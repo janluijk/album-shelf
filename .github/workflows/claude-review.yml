@@ -20,6 +20,7 @@ jobs:
       - uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          show_full_output: true
           prompt: |
             Review pull request #${{ github.event.pull_request.number }} in
             ${{ github.repository }} for correctness bugs, security issues
@@ -32,5 +33,6 @@ jobs:
             gh pr comment ${{ github.event.pull_request.number }} --body "..."
             Your review is not delivered unless that command succeeds.
           claude_args: |
+            --model claude-sonnet-4-6
             --allowedTools "Bash(gh pr:*),Bash(gh api:*),Read,Grep,Glob"
             --max-turns 15
