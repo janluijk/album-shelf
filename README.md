@@ -2,6 +2,8 @@
 
 Queue albums you want to hear, rate the ones you have, and share your shelf at `/u/<username>`.
 
+**Live**: https://album-shelf-seven.vercel.app
+
 Built with Next.js 16, Tailwind v4, Drizzle ORM, Auth.js and Neon Postgres. Deployed to Vercel through GitHub Actions. Agent-facing documentation lives in [AGENTS.md](./AGENTS.md) / [CLAUDE.md](./CLAUDE.md); the task backlog lives in [backlog/](./backlog/) (managed with [backlog.md](https://github.com/MrLesk/Backlog.md)).
 
 ## Local development

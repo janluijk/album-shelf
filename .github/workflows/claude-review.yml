@@ -11,7 +11,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      issues: read
+      issues: write
       id-token: write
     steps:
       - uses: actions/checkout@v4
@@ -21,10 +21,16 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Review this pull request for correctness bugs, security issues
+            Review pull request #${{ github.event.pull_request.number }} in
+            ${{ github.repository }} for correctness bugs, security issues
             (especially around auth and data ownership), and deviations from
             the conventions in CLAUDE.md. Be concise: only flag things that
             matter, with file and line references. If everything looks good,
             say so briefly.
+
+            You MUST post your review as a comment on the pull request using:
+            gh pr comment ${{ github.event.pull_request.number }} --body "..."
+            Your review is not delivered unless that command succeeds.
           claude_args: |
             --allowedTools "Bash(gh pr:*),Bash(gh api:*),Read,Grep,Glob"
+            --max-turns 15
