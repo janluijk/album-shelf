@@ -29,6 +29,15 @@ function parseUpdates(body: Record<string, unknown>): Partial<Album> | null {
     updates.note = body.note as string | null;
   }
 
+  if ("position" in body) {
+    const validPosition =
+      typeof body.position === "number" &&
+      Number.isInteger(body.position) &&
+      body.position >= 1;
+    if (!validPosition) return null;
+    updates.position = body.position as number;
+  }
+
   if ("listenedOn" in body) {
     const validDate =
       body.listenedOn === null ||
