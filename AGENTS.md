@@ -50,6 +50,11 @@ A standalone web app to queue, rate and share music albums. Users sign in with G
 - Before writing code against Next.js, Tailwind v4, Drizzle or Auth.js APIs you are not certain about, resolve current docs via the Context7 MCP (configured in `.mcp.json`) instead of relying on memory — these libraries move fast.
 - To verify UI changes visually, use the Playwright MCP against `npm run dev`.
 
+## Dependency gotchas
+
+- `esbuild` and `picomatch` are root devDependencies only to satisfy optional peer ranges of vite 8 and fdir — without them npm hoists older transitive versions into those slots and writes a lockfile that `npm ci` rejects on the Linux CI runners. Do not remove them.
+- After adding or updating dependencies on Windows, run `npm ci` locally and check `npm ls` for `invalid` entries before pushing; an invalid tree here can still install locally while breaking CI.
+
 ## Environment
 
 Copy `.env.example` to `.env`. Required: `DATABASE_URL` (Neon), `AUTH_SECRET` (`npx auth secret`), `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` (GitHub OAuth app). GitHub Actions additionally needs the secrets listed in `README.md`.
