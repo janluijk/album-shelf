@@ -1,0 +1,15 @@
+name: Preview Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete-neon-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: neondatabase/delete-branch-action@v3
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ github.event.pull_request.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}

@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Album Shelf
 
-## Getting Started
+Queue albums you want to hear, rate the ones you have, and share your shelf at `/u/<username>`.
 
-First, run the development server:
+Built with Next.js 16, Tailwind v4, Drizzle ORM, Auth.js and Neon Postgres. Deployed to Vercel through GitHub Actions. Agent-facing documentation lives in [AGENTS.md](./AGENTS.md) / [CLAUDE.md](./CLAUDE.md); the task backlog lives in [backlog/](./backlog/) (managed with [backlog.md](https://github.com/MrLesk/Backlog.md)).
+
+## Local development
 
 ```bash
+npm install
+cp .env.example .env   # fill in the values below
+npm run db:migrate
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variable | Where it comes from |
+| --- | --- |
+| `DATABASE_URL` | Neon project connection string (pooled) |
+| `AUTH_SECRET` | `npx auth secret` |
+| `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | GitHub OAuth app with callback `http://localhost:3000/api/auth/callback/github` |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Quality gates: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run test:e2e`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Deployment pipeline
 
-## Learn More
+Everything deploys through GitHub Actions — disable Vercel's own git integration for this repo.
 
-To learn more about Next.js, take a look at the following resources:
+```
+PR opened ──> CI (lint, typecheck, unit tests, build)
+          ──> Preview: Neon branch preview/pr-N ─> migrate ─> vercel deploy ─> Playwright e2e ─> URL comment
+          ──> Claude Review (AI code review comment)
+PR closed ──> Neon branch deleted
+merge to main ──> tests ─> migrate production DB ─> vercel deploy --prod
+@claude in issues/PR comments ──> Claude implements or answers
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Required GitHub Actions secrets
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Secret | Purpose |
+| --- | --- |
+| `VERCEL_TOKEN` | Vercel CLI deploys |
+| `VERCEL_ORG_ID` / `VERCEL_PROJECT_ID` | From `.vercel/project.json` after `vercel link` |
+| `NEON_API_KEY` / `NEON_PROJECT_ID` | Neon branch create/delete per PR |
+| `DATABASE_URL` | Production Neon connection string (migrations on deploy) |
+| `VERCEL_AUTOMATION_BYPASS_SECRET` | Lets Playwright through Vercel deployment protection |
+| `ANTHROPIC_API_KEY` | Claude review and `@claude` workflows |
 
-## Deploy on Vercel
+Vercel project env vars (production + preview): `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`. Preview deploys get their `DATABASE_URL` overridden per-deployment to the PR's Neon branch.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Schema changes
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Edit `src/lib/db/schema.ts`, then `npm run db:generate` and commit the migration in `drizzle/`. Migrations run automatically: against the PR's Neon branch on preview deploys, against production on merge to `main`. Never use `drizzle-kit push`.

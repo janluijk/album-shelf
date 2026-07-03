@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run test:*)",
+      "Bash(npm run test)",
+      "Bash(npm run build)",
+      "Bash(npm run db:generate)",
+      "Bash(npx vitest run:*)",
+      "Bash(npx playwright test:*)",
+      "Bash(npx backlog.md:*)",
+      "Bash(backlog:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)"
+    ]
+  }
+}
