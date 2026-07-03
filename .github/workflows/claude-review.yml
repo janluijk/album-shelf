@@ -33,5 +33,6 @@ jobs:
             gh pr comment ${{ github.event.pull_request.number }} --body "..."
             Your review is not delivered unless that command succeeds.
           claude_args: |
+            --model claude-sonnet-4-6
             --allowedTools "Bash(gh pr:*),Bash(gh api:*),Read,Grep,Glob"
             --max-turns 15
