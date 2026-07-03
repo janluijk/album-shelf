@@ -49,6 +49,10 @@ merge to main ──> tests ─> migrate production DB ─> vercel deploy --prod
 
 Vercel project env vars (production + preview): `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`. Preview deploys get their `DATABASE_URL` overridden per-deployment to the PR's Neon branch.
 
+### Sign-in on preview deploys
+
+Each PR gets a fresh preview URL, but a GitHub OAuth app allows only one callback URL. The deploy workflows inject `AUTH_REDIRECT_PROXY_URL` (the production `/api/auth`) into both preview and production deployments, so Auth.js routes every OAuth flow through the production callback and forwards it back to the originating preview. This means sign-in works on all previews with only the production callback registered — no per-preview OAuth app or callback changes. The variable stays unset locally, where sign-in uses the localhost callback directly.
+
 ## Schema changes
 
 Edit `src/lib/db/schema.ts`, then `npm run db:generate` and commit the migration in `drizzle/`. Migrations run automatically: against the PR's Neon branch on preview deploys, against production on merge to `main`. Never use `drizzle-kit push`.
