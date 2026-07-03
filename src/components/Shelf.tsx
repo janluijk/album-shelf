@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Album } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
+import CoverThumb from "@/components/CoverThumb";
 import StarRating from "@/components/StarRating";
 
 type ShelfProps = {
@@ -74,6 +75,7 @@ export default function Shelf({ initialAlbums }: ShelfProps) {
         <ul className="space-y-2 mb-5">
           {queue.map((album, index) => (
             <li key={album.id} className="group flex items-center gap-3">
+              <CoverThumb coverUrl={album.coverUrl} title={album.title} />
               <div className="flex-1">
                 <span className="text-sm font-medium">{album.title}</span>
                 <span className="text-sm text-[var(--muted)]">
@@ -140,6 +142,7 @@ export default function Shelf({ initialAlbums }: ShelfProps) {
           {history.map((album) => (
             <li key={album.id} className="group">
               <div className="flex items-center gap-3">
+                <CoverThumb coverUrl={album.coverUrl} title={album.title} />
                 <div className="flex-1">
                   <span className="text-sm font-medium">{album.title}</span>
                   <span className="text-sm text-[var(--muted)]">
