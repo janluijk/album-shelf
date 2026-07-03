@@ -1,6 +1,8 @@
 {
   "permissions": {
     "allow": [
+      "Bash(npm install)",
+      "Bash(npm ci)",
       "Bash(npm run lint)",
       "Bash(npm run typecheck)",
       "Bash(npm run test:*)",
@@ -16,8 +18,22 @@
       "Bash(git log:*)",
       "Bash(gh pr view:*)",
       "Bash(gh pr list:*)",
+      "Bash(gh pr checks:*)",
       "Bash(gh run view:*)",
       "Bash(gh run list:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash scripts/web-setup.sh"
+          }
+        ]
+      }
     ]
   }
 }
