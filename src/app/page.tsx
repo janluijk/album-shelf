@@ -53,6 +53,9 @@ export default async function Home() {
               @{session.user.username}
             </Link>
           )}
+          <Link href="/settings" className="hover:text-[var(--accent)]">
+            Settings
+          </Link>
           <form
             action={async () => {
               "use server";
