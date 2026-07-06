@@ -34,6 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     verificationTokensTable: verificationTokens,
   }),
   providers: [GitHub],
+  redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
   events: {
     async createUser({ user }) {
       if (!user.id) return;
