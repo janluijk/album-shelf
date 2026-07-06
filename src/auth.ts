@@ -26,7 +26,7 @@ async function assignUsername(userId: string, name: string | null | undefined, e
   await db.update(users).set({ username: candidate }).where(eq(users.id, userId));
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   adapter: DrizzleAdapter(getDb(), {
     usersTable: users,
     accountsTable: accounts,
@@ -48,4 +48,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       return session;
     },
   },
-});
+}));

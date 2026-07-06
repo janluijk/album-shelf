@@ -59,14 +59,13 @@ A standalone web app to queue, rate and share music albums. Users sign in with G
 
 Copy `.env.example` to `.env`. Required: `DATABASE_URL` (Neon), `AUTH_SECRET` (`npx auth secret`), `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` (GitHub OAuth app). GitHub Actions additionally needs the secrets listed in `README.md`.
 
-In Claude Code web sessions there is no `.env`: `scripts/web-setup.sh` installs dependencies on session start, and lint/typecheck/tests/build all work without a real database (use dummy `DATABASE_URL`/`AUTH_SECRET` for build). Anything needing live data belongs in a local session or the PR preview.
+In Claude Code web sessions there is no `.env`: `scripts/web-setup.sh` installs dependencies on session start, and lint/typecheck/tests/build all work with no database or auth env at all (auth is lazily initialized, so `next build` never touches the database). Anything needing live data belongs in a local session or the PR preview.
 
 ## Deployed infrastructure
 
 - Production: https://album-shelf-seven.vercel.app — Vercel project `album-shelf` (team `dlg03s-projects`), no Vercel Git integration; GitHub Actions owns all deploys
 - Database: Neon project `album-shelf` (`purple-dawn-20749038`, aws-us-west-2, PG17); PR previews run on Neon branches `preview/pr-N`
 - GitHub OAuth apps: dev app (localhost:3000) with creds in local `.env`; production app with creds in Vercel env
-- `vercel build` does not inject pulled env vars into `next build` — workflow steps must pass `DATABASE_URL` explicitly in their `env:` block
-- Known debt: `src/auth.ts` constructs the Drizzle adapter at module scope, contradicting the lazy-init convention (backlog task exists)
+- `next build` needs no database env: `src/auth.ts` builds the Drizzle adapter lazily via NextAuth's function config, so the build steps run without `DATABASE_URL`. Only the migration steps (`db:migrate`) pass it explicitly.
 
 For pipeline operations and troubleshooting, use the `pipeline` skill; for the develop-and-ship workflow, use the `ship` skill (both in `.claude/skills/`).
