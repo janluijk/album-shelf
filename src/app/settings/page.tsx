@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
+import UsernameForm from "@/components/UsernameForm";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -42,6 +43,12 @@ export default async function SettingsPage() {
               <dd>{user.email ?? "—"}</dd>
             </div>
           </dl>
+        </section>
+        <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Username
+          </h2>
+          <UsernameForm initialUsername={user.username} />
         </section>
       </div>
     </main>
