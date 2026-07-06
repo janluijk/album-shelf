@@ -5,6 +5,8 @@ import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import UsernameForm from "@/components/UsernameForm";
+import RatingModeForm from "@/components/RatingModeForm";
+import { isValidGranularity } from "@/lib/ratings";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -49,6 +51,18 @@ export default async function SettingsPage() {
             Username
           </h2>
           <UsernameForm initialUsername={user.username} />
+        </section>
+        <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Ratings
+          </h2>
+          <RatingModeForm
+            initialMode={
+              isValidGranularity(user.ratingGranularity)
+                ? user.ratingGranularity
+                : "integer"
+            }
+          />
         </section>
       </div>
     </main>

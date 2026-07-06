@@ -1,9 +1,10 @@
 ---
 id: TASK-21.3
 title: Rating granularity preference
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-06 13:05'
+updated_date: '2026-07-06 14:54'
 labels:
   - m3
   - settings

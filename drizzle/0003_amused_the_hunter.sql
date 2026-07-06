@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "rating_granularity" text DEFAULT 'integer' NOT NULL;
