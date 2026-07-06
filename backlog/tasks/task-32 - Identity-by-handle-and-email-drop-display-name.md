@@ -4,7 +4,7 @@ title: Identity by handle and email (drop display name)
 status: To Do
 assignee: []
 created_date: '2026-07-06 15:18'
-updated_date: '2026-07-06 15:20'
+updated_date: '2026-07-06 15:24'
 labels:
   - m3
 dependencies: []
@@ -14,5 +14,5 @@ ordinal: 31000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Identify accounts by @handle + email; drop the display Name from the UI. Seed the initial @handle from the GitHub display name (slugified, numeric suffix for uniqueness) instead of the email local-part: change deriveUsername to prefer name, falling back to the email prefix, then 'listener'. Keep the user.name column — Auth.js's Drizzle adapter writes it from the OAuth profile on sign-in, and it now serves purely as the handle seed; it is never shown. Remove the Name row from the settings Account card and use @username as the profile heading (not user.name ?? user.username). Existing users keep their current handle (editable via task 18); this only changes the default for new sign-ups. The UI removals share files with PR #16 (settings page, profile) so land after #16 merges; the deriveUsername change is isolated (src/lib/usernames.ts) and can ship anytime.
+Remove the display Name entirely (no name column) and identify accounts by @handle + email (email is the unique key). Auth.js's Drizzle adapter createUser inserts name/email/emailVerified/image, so dropping the column needs a custom adapter: wrap DrizzleAdapter and override createUser to derive a unique @handle from the incoming GitHub profile name (slugified via deriveUsername with a numeric suffix for uniqueness; fall back to the email local-part, then listener) and insert only existing columns (username, email, emailVerified, image, id) with no name. Then drop the user.name column via a generated migration, fold the current events.createUser username assignment into the custom createUser, remove the Name row from the settings Account card, and use @username as the profile heading. Update deriveUsername to prefer name over the email prefix. Existing users keep their handle. Adapter/schema work plus UI that shares files with PR #16 (settings page, profile), so land after #16 merges.
 <!-- SECTION:DESCRIPTION:END -->
