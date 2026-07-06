@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { Album } from "@/lib/db/schema";
-import { partitionAlbums } from "@/lib/albums";
+import { partitionAlbums, swapWithNeighbor } from "@/lib/albums";
 import CoverThumb from "@/components/CoverThumb";
 import StarRating from "@/components/StarRating";
 
@@ -56,6 +56,12 @@ export default function Shelf({ initialAlbums }: ShelfProps) {
     });
   }
 
+  function moveAlbum(id: number, direction: "up" | "down") {
+    const swaps = swapWithNeighbor(queue, id, direction);
+    if (!swaps) return;
+    swaps.forEach((swap) => patchAlbum(swap.id, { position: swap.position }));
+  }
+
   function removeAlbum(id: number) {
     setAlbums((current) => current.filter((album) => album.id !== id));
     void fetch(`/api/albums/${id}`, { method: "DELETE" });
@@ -94,6 +100,26 @@ export default function Shelf({ initialAlbums }: ShelfProps) {
                   Mark as listened
                 </button>
               )}
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => moveAlbum(album.id, "up")}
+                  disabled={index === 0}
+                  aria-label={`Move ${album.title} up`}
+                  className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
+                >
+                  ↑
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveAlbum(album.id, "down")}
+                  disabled={index === queue.length - 1}
+                  aria-label={`Move ${album.title} down`}
+                  className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
+                >
+                  ↓
+                </button>
+              </div>
               <button
                 type="button"
                 onClick={() => removeAlbum(album.id)}

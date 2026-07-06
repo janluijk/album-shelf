@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isValidRating, nextPosition, partitionAlbums } from "./albums";
+import {
+  isValidRating,
+  nextPosition,
+  partitionAlbums,
+  swapWithNeighbor,
+} from "./albums";
 
 describe("partitionAlbums", () => {
   it("splits albums into queue and history", () => {
@@ -49,6 +54,48 @@ describe("nextPosition", () => {
       { listenedOn: "2026-06-01", position: 9 },
     ];
     expect(nextPosition(albums)).toBe(10);
+  });
+});
+
+describe("swapWithNeighbor", () => {
+  const queue = [
+    { id: 10, listenedOn: null, position: 2 },
+    { id: 20, listenedOn: null, position: 5 },
+    { id: 30, listenedOn: null, position: 9 },
+  ];
+
+  it("swaps positions with the album above", () => {
+    expect(swapWithNeighbor(queue, 20, "up")).toEqual([
+      { id: 20, position: 2 },
+      { id: 10, position: 5 },
+    ]);
+  });
+
+  it("swaps positions with the album below", () => {
+    expect(swapWithNeighbor(queue, 20, "down")).toEqual([
+      { id: 20, position: 9 },
+      { id: 30, position: 5 },
+    ]);
+  });
+
+  it("returns null when moving the top album up", () => {
+    expect(swapWithNeighbor(queue, 10, "up")).toBeNull();
+  });
+
+  it("returns null when moving the bottom album down", () => {
+    expect(swapWithNeighbor(queue, 30, "down")).toBeNull();
+  });
+
+  it("returns null for an unknown id", () => {
+    expect(swapWithNeighbor(queue, 99, "up")).toBeNull();
+  });
+
+  it("does not depend on input order", () => {
+    const shuffled = [queue[2], queue[0], queue[1]];
+    expect(swapWithNeighbor(shuffled, 20, "up")).toEqual([
+      { id: 20, position: 2 },
+      { id: 10, position: 5 },
+    ]);
   });
 });
 
