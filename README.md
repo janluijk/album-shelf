@@ -20,6 +20,7 @@ npm run dev
 | `DATABASE_URL` | Neon project connection string (pooled) |
 | `AUTH_SECRET` | `npx auth secret` |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | GitHub OAuth app with callback `http://localhost:3000/api/auth/callback/github` |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Google Cloud OAuth client with redirect URIs `http://localhost:3000/api/auth/callback/google` (dev) and `https://album-shelf-seven.vercel.app/api/auth/callback/google` (prod; previews reuse it via the redirect proxy) |
 
 Quality gates: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run test:e2e`.
 

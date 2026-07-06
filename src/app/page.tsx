@@ -13,19 +13,34 @@ function Landing() {
         Queue albums you want to hear, rate the ones you have, and share your
         shelf with friends.
       </p>
-      <form
-        action={async () => {
-          "use server";
-          await signIn("github");
-        }}
-      >
-        <button
-          type="submit"
-          className="rounded-lg bg-[var(--accent)] text-white px-5 py-2.5 text-sm font-medium"
+      <div className="flex w-full max-w-xs flex-col gap-3">
+        <form
+          action={async () => {
+            "use server";
+            await signIn("github");
+          }}
         >
-          Sign in with GitHub
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="w-full rounded-lg bg-[var(--accent)] text-white px-5 py-2.5 text-sm font-medium"
+          >
+            Sign in with GitHub
+          </button>
+        </form>
+        <form
+          action={async () => {
+            "use server";
+            await signIn("google");
+          }}
+        >
+          <button
+            type="submit"
+            className="w-full rounded-lg border border-[var(--card-border)] px-5 py-2.5 text-sm font-medium hover:border-[var(--accent)]"
+          >
+            Sign in with Google
+          </button>
+        </form>
+      </div>
     </main>
   );
 }

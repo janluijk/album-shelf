@@ -13,7 +13,7 @@ A standalone web app to queue, rate and share music albums. Users sign in with G
 - Next.js 16 (App Router) + React 19 + TypeScript, strict mode
 - Tailwind CSS v4 — no component library, custom UI on CSS variable tokens
 - Drizzle ORM + Neon Postgres (`@neondatabase/serverless`, HTTP driver)
-- Auth.js v5 (next-auth beta) with the Drizzle adapter, GitHub provider, database sessions
+- Auth.js v5 (next-auth beta) with the Drizzle adapter, GitHub and Google providers, database sessions
 - Vitest for unit tests, Playwright for e2e
 - Hosted on Vercel; deploys run through GitHub Actions (never push directly to Vercel)
 
@@ -57,7 +57,7 @@ A standalone web app to queue, rate and share music albums. Users sign in with G
 
 ## Environment
 
-Copy `.env.example` to `.env`. Required: `DATABASE_URL` (Neon), `AUTH_SECRET` (`npx auth secret`), `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` (GitHub OAuth app). GitHub Actions additionally needs the secrets listed in `README.md`.
+Copy `.env.example` to `.env`. Required: `DATABASE_URL` (Neon), `AUTH_SECRET` (`npx auth secret`), `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` (GitHub OAuth app), `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` (Google Cloud OAuth client). GitHub Actions additionally needs the secrets listed in `README.md`.
 
 In Claude Code web sessions there is no `.env`: `scripts/web-setup.sh` installs dependencies on session start, and lint/typecheck/tests/build all work with no database or auth env at all (auth is lazily initialized, so `next build` never touches the database). Anything needing live data belongs in a local session or the PR preview.
 
@@ -65,7 +65,7 @@ In Claude Code web sessions there is no `.env`: `scripts/web-setup.sh` installs 
 
 - Production: https://album-shelf-seven.vercel.app — Vercel project `album-shelf` (team `dlg03s-projects`), no Vercel Git integration; GitHub Actions owns all deploys
 - Database: Neon project `album-shelf` (`purple-dawn-20749038`, aws-us-west-2, PG17); PR previews run on Neon branches `preview/pr-N`
-- GitHub OAuth apps: dev app (localhost:3000) with creds in local `.env`; production app with creds in Vercel env
+- OAuth apps (GitHub + Google): dev clients (localhost:3000 callbacks) with creds in local `.env`; production clients with creds in Vercel env. Only the production callback is registered per provider; preview deploys reuse it via `AUTH_REDIRECT_PROXY_URL`
 - `next build` needs no database env: `src/auth.ts` builds the Drizzle adapter lazily via NextAuth's function config, so the build steps run without `DATABASE_URL`. Only the migration steps (`db:migrate`) pass it explicitly.
 
 For pipeline operations and troubleshooting, use the `pipeline` skill; for the develop-and-ship workflow, use the `ship` skill (both in `.claude/skills/`).

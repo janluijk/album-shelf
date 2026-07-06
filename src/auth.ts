@@ -1,5 +1,6 @@
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
+import Google from "next-auth/providers/google";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
@@ -33,7 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
     sessionsTable: sessions,
     verificationTokensTable: verificationTokens,
   }),
-  providers: [GitHub],
+  providers: [GitHub, Google],
   redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
   events: {
     async createUser({ user }) {
