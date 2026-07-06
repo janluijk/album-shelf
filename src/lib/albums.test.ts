@@ -106,8 +106,20 @@ describe("isValidRating", () => {
     });
   });
 
-  it("rejects out-of-range and non-integer values", () => {
-    [0, 6, 2.5, "3", null, undefined, NaN].forEach((rating) => {
+  it("accepts one-decimal values in range", () => {
+    [1.0, 2.5, 3.7, 4.8, 5.0].forEach((rating) => {
+      expect(isValidRating(rating)).toBe(true);
+    });
+  });
+
+  it("rejects more than one decimal place", () => {
+    [2.55, 3.14, 4.999].forEach((rating) => {
+      expect(isValidRating(rating)).toBe(false);
+    });
+  });
+
+  it("rejects out-of-range and non-number values", () => {
+    [0, 0.9, 5.1, 6, "3", null, undefined, NaN].forEach((rating) => {
       expect(isValidRating(rating)).toBe(false);
     });
   });

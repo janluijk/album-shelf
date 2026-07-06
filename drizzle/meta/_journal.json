@@ -15,6 +15,13 @@
       "when": 1783083475350,
       "tag": "0001_album-cover-url",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783343192421,
+      "tag": "0002_album-rating-numeric",
+      "breakpoints": true
     }
   ]
 }

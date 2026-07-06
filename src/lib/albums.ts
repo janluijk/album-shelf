@@ -46,8 +46,8 @@ export function swapWithNeighbor<T extends AlbumLike & { id: number }>(
 export function isValidRating(value: unknown): value is number {
   return (
     typeof value === "number" &&
-    Number.isInteger(value) &&
     value >= 1 &&
-    value <= 5
+    value <= 5 &&
+    Math.round(value * 10) / 10 === value
   );
 }

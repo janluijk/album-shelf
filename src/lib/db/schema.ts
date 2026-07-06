@@ -1,6 +1,7 @@
 import {
   date,
   integer,
+  numeric,
   pgTable,
   primaryKey,
   text,
@@ -70,7 +71,7 @@ export const albums = pgTable("album", {
     .references(() => users.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   artist: text("artist").notNull(),
-  rating: integer("rating"),
+  rating: numeric("rating", { precision: 2, scale: 1, mode: "number" }),
   note: text("note"),
   coverUrl: text("cover_url"),
   listenedOn: date("listened_on"),
