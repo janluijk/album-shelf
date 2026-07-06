@@ -76,7 +76,7 @@ export default function StarRating({
               const next = parseFloat(event.target.value);
               if (isValidRating(next)) onChange(next);
             }}
-            className="w-16 rounded border border-[var(--card-border)] bg-transparent px-1 py-0.5 text-xs outline-none focus:border-[var(--accent)]"
+            className="w-10 rounded border border-[var(--card-border)] bg-transparent px-1 py-0.5 text-xs outline-none focus:border-[var(--accent)]"
           />
         ) : (
           <div

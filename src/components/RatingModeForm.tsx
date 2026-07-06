@@ -61,8 +61,7 @@ export default function RatingModeForm({ initialMode }: RatingModeFormProps) {
         </label>
       ))}
       <p className="text-xs text-[var(--muted)]">
-        How you rate albums: whole stars, half stars, or type a decimal from 1.0
-        to 5.0 (the input appears when you hover the stars).
+        How you rate albums: whole stars, half stars, or decimal form.
       </p>
 
       <div
