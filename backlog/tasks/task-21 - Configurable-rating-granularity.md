@@ -6,6 +6,7 @@ assignee: []
 created_date: '2026-07-06 12:10'
 labels:
   - m3
+  - settings
 dependencies: []
 ordinal: 20000
 ---
@@ -21,4 +22,6 @@ Let users choose how they rate albums: integer stars (current behavior), half-st
 4. Settings page — a small settings surface to pick the rating granularity (could share a page with task-18 editable username if that lands).
 
 Each phase should be split into its own executable subtask when picked up.
+
+Substory of the Settings menu epic (task-22); phase 4 delivers its control on that page.
 <!-- SECTION:DESCRIPTION:END -->
