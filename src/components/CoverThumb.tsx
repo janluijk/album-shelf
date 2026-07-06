@@ -10,7 +10,7 @@ export default function CoverThumb({ coverUrl, title }: CoverThumbProps) {
     return (
       <div
         aria-hidden
-        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-[var(--card-border)] text-[var(--muted)]"
+        className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md border border-[var(--card-border)] text-[var(--muted)]"
       >
         ♪
       </div>
@@ -21,9 +21,9 @@ export default function CoverThumb({ coverUrl, title }: CoverThumbProps) {
     <Image
       src={coverUrl}
       alt={`${title} cover art`}
-      width={40}
-      height={40}
-      className="h-10 w-10 shrink-0 rounded-md object-cover"
+      width={56}
+      height={56}
+      className="h-14 w-14 shrink-0 rounded-md object-cover"
     />
   );
 }
