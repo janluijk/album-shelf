@@ -6,8 +6,9 @@ type StarRatingProps = {
 };
 
 export default function StarRating({ value, onChange }: StarRatingProps) {
+  const isFractional = value !== null && !Number.isInteger(value);
   return (
-    <div className="flex gap-0.5">
+    <div className="flex items-center gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => {
         const filled = value !== null && star <= value;
         return (
@@ -25,6 +26,11 @@ export default function StarRating({ value, onChange }: StarRatingProps) {
           </button>
         );
       })}
+      {isFractional && (
+        <span className="ml-1 text-xs text-[var(--muted)]">
+          {value.toFixed(1)}
+        </span>
+      )}
     </div>
   );
 }
