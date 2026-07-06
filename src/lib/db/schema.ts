@@ -72,6 +72,7 @@ export const albums = pgTable("album", {
   artist: text("artist").notNull(),
   rating: integer("rating"),
   note: text("note"),
+  coverUrl: text("cover_url"),
   listenedOn: date("listened_on"),
   position: integer("position").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),

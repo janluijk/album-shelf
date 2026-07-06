@@ -10,6 +10,7 @@ concurrency:
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  AUTH_REDIRECT_PROXY_URL: https://album-shelf-seven.vercel.app/api/auth
 
 jobs:
   preview:
@@ -49,7 +50,8 @@ jobs:
         id: deploy
         run: |
           url=$(npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} \
-            --env DATABASE_URL="${{ steps.neon.outputs.db_url_with_pooler }}")
+            --env DATABASE_URL="${{ steps.neon.outputs.db_url_with_pooler }}" \
+            --env AUTH_REDIRECT_PROXY_URL="$AUTH_REDIRECT_PROXY_URL")
           echo "url=$url" >> "$GITHUB_OUTPUT"
 
       - name: Run e2e tests against preview
