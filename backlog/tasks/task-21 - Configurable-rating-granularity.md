@@ -1,11 +1,11 @@
 ---
 id: TASK-21
 title: 'Configurable rating granularity (decimal, half-star, integer)'
-status: In Progress
+status: Done
 assignee:
   - '@claude'
 created_date: '2026-07-06 12:10'
-updated_date: '2026-07-06 13:05'
+updated_date: '2026-07-06 14:54'
 labels:
   - m3
   - settings

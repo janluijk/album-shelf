@@ -5,9 +5,11 @@ import type { Album } from "@/lib/db/schema";
 import { partitionAlbums, swapWithNeighbor } from "@/lib/albums";
 import CoverThumb from "@/components/CoverThumb";
 import StarRating from "@/components/StarRating";
+import type { RatingGranularity } from "@/lib/ratings";
 
 type ShelfProps = {
   initialAlbums: Album[];
+  ratingGranularity: RatingGranularity;
 };
 
 function formatDate(value: string): string {
@@ -22,7 +24,7 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export default function Shelf({ initialAlbums }: ShelfProps) {
+export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) {
   const [albums, setAlbums] = useState(initialAlbums);
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
@@ -181,6 +183,7 @@ export default function Shelf({ initialAlbums }: ShelfProps) {
                 </div>
                 <StarRating
                   value={album.rating}
+                  mode={ratingGranularity}
                   onChange={(rating) => patchAlbum(album.id, { rating })}
                 />
                 <button

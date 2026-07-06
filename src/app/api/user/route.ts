@@ -4,6 +4,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { isValidUsername, usernameRules } from "@/lib/usernames";
+import { isValidGranularity } from "@/lib/ratings";
 
 export async function PATCH(request: Request) {
   const session = await auth();
@@ -12,29 +13,47 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const db = getDb();
   const body = await request.json();
-  if (!isValidUsername(body.username)) {
-    return NextResponse.json(
-      { error: `Invalid username. Use ${usernameRules}` },
-      { status: 400 },
-    );
+  const updates: { username?: string; ratingGranularity?: string } = {};
+
+  if ("username" in body) {
+    if (!isValidUsername(body.username)) {
+      return NextResponse.json(
+        { error: `Invalid username. Use ${usernameRules}` },
+        { status: 400 },
+      );
+    }
+    const taken = await db.query.users.findFirst({
+      where: and(eq(users.username, body.username), ne(users.id, userId)),
+    });
+    if (taken) {
+      return NextResponse.json(
+        { error: "That username is already taken" },
+        { status: 409 },
+      );
+    }
+    updates.username = body.username;
   }
 
-  const db = getDb();
-  const taken = await db.query.users.findFirst({
-    where: and(eq(users.username, body.username), ne(users.id, userId)),
-  });
-  if (taken) {
-    return NextResponse.json(
-      { error: "That username is already taken" },
-      { status: 409 },
-    );
+  if ("ratingGranularity" in body) {
+    if (!isValidGranularity(body.ratingGranularity)) {
+      return NextResponse.json({ error: "Invalid rating mode" }, { status: 400 });
+    }
+    updates.ratingGranularity = body.ratingGranularity;
+  }
+
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: "No valid updates" }, { status: 400 });
   }
 
   const [updated] = await db
     .update(users)
-    .set({ username: body.username })
+    .set(updates)
     .where(eq(users.id, userId))
-    .returning({ username: users.username });
+    .returning({
+      username: users.username,
+      ratingGranularity: users.ratingGranularity,
+    });
   return NextResponse.json(updated);
 }
