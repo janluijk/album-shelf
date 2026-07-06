@@ -4,10 +4,12 @@ title: Let users view and edit their username
 status: To Do
 assignee: []
 created_date: '2026-07-03 14:38'
+updated_date: '2026-07-06 13:47'
 labels:
   - m3
   - settings
-dependencies: []
+dependencies:
+  - TASK-22
 ordinal: 17000
 ---
 
