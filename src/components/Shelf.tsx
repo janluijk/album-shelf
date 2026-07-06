@@ -136,19 +136,19 @@ export default function Shelf({ initialAlbums }: ShelfProps) {
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Album"
-            className="flex-1 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="flex-1 min-w-0 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           />
           <input
             value={artist}
             onChange={(event) => setArtist(event.target.value)}
             placeholder="Artist"
-            className="flex-1 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            className="flex-1 min-w-0 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
           />
           <button
             type="button"
             onClick={addAlbum}
             disabled={!title.trim() || !artist.trim()}
-            className="rounded-lg bg-[var(--accent)] text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
+            className="shrink-0 rounded-lg bg-[var(--accent)] text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
           >
             Add
           </button>
