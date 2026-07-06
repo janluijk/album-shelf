@@ -27,9 +27,6 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run test
-        env:
-          DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
-          AUTH_SECRET: ci-only-secret
 
       - name: Run migrations on production database
         run: npm run db:migrate
@@ -40,8 +37,6 @@ jobs:
         run: |
           npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Deploy to production
         run: |

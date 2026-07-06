@@ -8,10 +8,6 @@ on:
       - 'backlog/**'
       - '**.md'
 
-env:
-  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
-  AUTH_SECRET: ci-only-secret
-
 jobs:
   quality:
     runs-on: ubuntu-latest
