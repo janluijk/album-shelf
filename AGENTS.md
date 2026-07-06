@@ -50,6 +50,15 @@ A standalone web app to queue, rate and share music albums. Users sign in with G
 - Before writing code against Next.js, Tailwind v4, Drizzle or Auth.js APIs you are not certain about, resolve current docs via the Context7 MCP (configured in `.mcp.json`) instead of relying on memory — these libraries move fast.
 - To verify UI changes visually, use the Playwright MCP against `npm run dev`.
 
+## Branch and task dependencies
+
+- Depend through `main`, not through branches. When task B builds on task A, merge A to `main` first, then branch B off `main`. If a PR lints/builds green *without* its dependency merged, it is carrying a private copy of that dependency — a red flag it will collide (e.g. a settings-dependent PR that renders its own settings page).
+- Avoid stacked PRs. If you must stack, do not squash-merge the base — squash rewrites the commit SHA and orphans the child branch into merge conflicts. Use a merge commit for the base, or rebase the child onto `main` the moment the base merges.
+- One owner per area at a time. Do not run two Claude sessions against this repo at once (a lingering web session or the `@claude` workflow counts); if unavoidable, partition them to non-overlapping files/tasks. Concurrent edits to the same files/branches are the main source of conflicts and duplicated work.
+- Sequential merges also protect migrations: two open PRs that each add `000X` collide. Merge one, then regenerate the other with `npm run db:generate`.
+- Encode order in the backlog: `backlog task create --parent <id> --dep <id>` creates real subtasks (`task-21.1`) and dependency edges. Before opening a PR for a task, run `backlog task view <id>` and don't start until its `--dep` tasks are Done/merged.
+- Create each backlog task exactly once, on `main` (or one branch) — never re-create the same task both in a PR branch and on `main`, or the files collide (add/add) on merge.
+
 ## Dependency gotchas
 
 - `esbuild` and `picomatch` are root devDependencies only to satisfy optional peer ranges of vite 8 and fdir — without them npm hoists older transitive versions into those slots and writes a lockfile that `npm ci` rejects on the Linux CI runners. Do not remove them.
