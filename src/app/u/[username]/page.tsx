@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
+import CoverThumb from "@/components/CoverThumb";
 import StarRating from "@/components/StarRating";
 
 function formatDate(value: string): string {
@@ -52,6 +53,7 @@ export default async function ProfilePage({
           {history.map((album) => (
             <li key={album.id}>
               <div className="flex items-center gap-3">
+                <CoverThumb coverUrl={album.coverUrl} title={album.title} />
                 <div className="flex-1">
                   <span className="text-sm font-medium">{album.title}</span>
                   <span className="text-sm text-[var(--muted)]">
