@@ -14,3 +14,13 @@ export function isValidGranularity(value: unknown): value is RatingGranularity {
     (RATING_GRANULARITIES as readonly string[]).includes(value)
   );
 }
+
+export function displayRating(
+  value: number | null,
+  mode: RatingGranularity,
+): number | null {
+  if (value === null) return null;
+  if (mode === "integer") return Math.floor(value);
+  if (mode === "half") return Math.round(value * 2) / 2;
+  return value;
+}

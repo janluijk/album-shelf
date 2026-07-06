@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
+import { isValidGranularity } from "@/lib/ratings";
 import CoverThumb from "@/components/CoverThumb";
 import StarRating from "@/components/StarRating";
 
@@ -30,6 +31,9 @@ export default async function ProfilePage({
     where: eq(albums.userId, user.id),
   });
   const { history } = partitionAlbums(userAlbums);
+  const ratingMode = isValidGranularity(user.ratingGranularity)
+    ? user.ratingGranularity
+    : "integer";
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 p-6">
@@ -64,7 +68,7 @@ export default async function ProfilePage({
                     {formatDate(album.listenedOn!)}
                   </div>
                 </div>
-                <StarRating value={album.rating} />
+                <StarRating value={album.rating} mode={ratingMode} />
               </div>
               {album.note && (
                 <p className="mt-1 text-xs italic text-[var(--muted)]">
