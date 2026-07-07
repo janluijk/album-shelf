@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -32,6 +33,12 @@ export default function RootLayout({
         <footer className="mt-auto border-t border-[var(--card-border)]">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between p-6 text-xs text-[var(--muted)]">
             <span>Album Shelf</span>
+            <Link
+              href="/shelves"
+              className="hover:text-[var(--accent)]"
+            >
+              Browse shelves
+            </Link>
             <a
               href="https://github.com/janluijk/album-shelf"
               target="_blank"

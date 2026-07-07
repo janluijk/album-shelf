@@ -20,6 +20,7 @@ export async function PATCH(request: Request) {
     username?: string;
     ratingGranularity?: string;
     bio?: string | null;
+    shelfPublic?: boolean;
   } = {};
 
   if ("username" in body) {
@@ -58,6 +59,16 @@ export async function PATCH(request: Request) {
     updates.bio = normalizeBio(body.bio);
   }
 
+  if ("shelfPublic" in body) {
+    if (typeof body.shelfPublic !== "boolean") {
+      return NextResponse.json(
+        { error: "Invalid visibility" },
+        { status: 400 },
+      );
+    }
+    updates.shelfPublic = body.shelfPublic;
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid updates" }, { status: 400 });
   }
@@ -70,6 +81,7 @@ export async function PATCH(request: Request) {
       username: users.username,
       ratingGranularity: users.ratingGranularity,
       bio: users.bio,
+      shelfPublic: users.shelfPublic,
     });
   return NextResponse.json(updated);
 }

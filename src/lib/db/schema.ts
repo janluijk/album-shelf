@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   integer,
   numeric,
@@ -20,6 +21,7 @@ export const users = pgTable("user", {
   image: text("image"),
   ratingGranularity: text("rating_granularity").notNull().default("integer"),
   bio: text("bio"),
+  shelfPublic: boolean("shelf_public").notNull().default(true),
 });
 
 export const accounts = pgTable(

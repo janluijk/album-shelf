@@ -1,0 +1,1 @@
+ALTER TABLE "user" ADD COLUMN "shelf_public" boolean DEFAULT true NOT NULL;
