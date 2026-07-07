@@ -4,7 +4,7 @@ import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
 import { isValidGranularity } from "@/lib/ratings";
-import CoverThumb from "@/components/CoverThumb";
+import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 
 function formatDate(value: string): string {
@@ -53,33 +53,27 @@ export default async function ProfilePage({
       </header>
       <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
         <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
-          Listened
+          Recent activity
         </h2>
         {history.length === 0 && (
           <p className="text-sm text-[var(--muted)]">Nothing here yet.</p>
         )}
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
           {history.map((album) => (
             <li key={album.id}>
-              <div className="flex items-center gap-3">
-                <CoverThumb coverUrl={album.coverUrl} title={album.title} />
-                <div className="flex-1">
-                  <span className="text-sm font-medium">{album.title}</span>
-                  <span className="text-sm text-[var(--muted)]">
-                    {" "}
-                    — {album.artist}
-                  </span>
-                  <div className="text-xs text-[var(--muted)]">
-                    {formatDate(album.listenedOn!)}
-                  </div>
-                </div>
-                <StarRating value={album.rating} mode={ratingMode} />
-              </div>
-              {album.note && (
-                <p className="mt-1 text-xs italic text-[var(--muted)]">
-                  {album.note}
+              <AlbumCover coverUrl={album.coverUrl} title={album.title} />
+              <div className="mt-2">
+                <p className="truncate text-sm font-medium">{album.title}</p>
+                <p className="truncate text-xs text-[var(--muted)]">
+                  {album.artist}
                 </p>
-              )}
+                <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
+                  <StarRating value={album.rating} mode={ratingMode} />
+                  <span className="text-xs text-[var(--muted)]">
+                    {formatDate(album.listenedOn!)}
+                  </span>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
