@@ -91,7 +91,7 @@ export default function RatingLegendForm({
     const bar = barRef.current;
     if (!bar || !legend) return;
     const rect = bar.getBoundingClientRect();
-    const raw = 1 + ((clientX - rect.left) / rect.width) * 4;
+    const raw = 1 + ((clientX - rect.left) / rect.width) * (4 + step);
     update(moveCut(legend, cutIndex, snapToGrid(raw, mode)));
   }
 
@@ -126,7 +126,8 @@ export default function RatingLegendForm({
     );
   }
 
-  const boundaries = [1, ...legend.cuts, 5];
+  const span = 4 + step;
+  const boundaries = [1, ...legend.cuts, 1 + span];
   const ranges = segmentRanges(legend, mode);
   const stars = [1, 2, 3, 4, 5];
 
@@ -138,7 +139,7 @@ export default function RatingLegendForm({
             <div
               key={i}
               style={{
-                width: `${((boundaries[i + 1] - boundaries[i]) / 4) * 100}%`,
+                width: `${((boundaries[i + 1] - boundaries[i]) / span) * 100}%`,
                 background: tintFor(i, legend.labels.length),
               }}
             />
@@ -163,7 +164,7 @@ export default function RatingLegendForm({
               if (event.key === "ArrowRight")
                 update(moveCut(legend, i, cut + step));
             }}
-            style={{ left: `${((cut - 1) / 4) * 100}%` }}
+            style={{ left: `${((cut - 1) / span) * 100}%` }}
             className="absolute -top-1 h-11 w-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-full border border-[var(--card-border)] bg-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none"
           />
         ))}
@@ -174,7 +175,14 @@ export default function RatingLegendForm({
           {stars.map((star) => (
             <span
               key={star}
-              style={{ left: `${((star - 1) / 4) * 100}%` }}
+              style={{
+                left:
+                  star === 1
+                    ? "0%"
+                    : star === 5
+                      ? "100%"
+                      : `${((star - 1 + step / 2) / span) * 100}%`,
+              }}
               className={`absolute ${
                 star === 1
                   ? ""
