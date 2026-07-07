@@ -47,7 +47,13 @@ function ToastCard({
 
   const isVisible = entered && !toast.leaving;
   const accentBorder =
-    toast.variant === "error" ? "border-[var(--accent)]" : "border-[var(--card-border)]";
+    toast.variant === "error"
+      ? "border-[var(--accent)]"
+      : "border-[var(--card-border)]";
+  const titleColor =
+    toast.variant === "success"
+      ? "text-[var(--accent)]"
+      : "text-[var(--foreground)]";
 
   return (
     <div
@@ -60,9 +66,7 @@ function ToastCard({
       <div className="flex items-start justify-between gap-2">
         <div>
           {toast.title && (
-            <p className="mb-1 font-medium text-[var(--foreground)]">
-              {toast.title}
-            </p>
+            <p className={`mb-1 font-medium ${titleColor}`}>{toast.title}</p>
           )}
           <p>{toast.message}</p>
         </div>
