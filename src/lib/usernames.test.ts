@@ -29,12 +29,14 @@ describe("isValidUsername", () => {
 });
 
 describe("deriveUsername", () => {
-  it("uses the email prefix when available", () => {
-    expect(deriveUsername("Jan Luijk", "j.luijk@example.com")).toBe("j-luijk");
+  it("prefers the profile name when available", () => {
+    expect(deriveUsername("Jan Luijk", "j.luijk@example.com")).toBe(
+      "jan-luijk",
+    );
   });
 
-  it("falls back to the name when there is no email", () => {
-    expect(deriveUsername("Jan Luijk", null)).toBe("jan-luijk");
+  it("falls back to the email prefix when there is no name", () => {
+    expect(deriveUsername(null, "j.luijk@example.com")).toBe("j-luijk");
   });
 
   it("strips leading and trailing separators", () => {

@@ -38,10 +38,6 @@ export default async function SettingsPage() {
           </h2>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between gap-4">
-              <dt className="text-[var(--muted)]">Name</dt>
-              <dd>{user.name ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
               <dt className="text-[var(--muted)]">Email</dt>
               <dd>{user.email ?? "—"}</dd>
             </div>
