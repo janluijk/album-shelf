@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
 import { isValidGranularity } from "@/lib/ratings";
+import { formatInterval, isValidLegend } from "@/lib/ratingLegend";
 import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 
@@ -34,6 +35,7 @@ export default async function ProfilePage({
   const ratingMode = isValidGranularity(user.ratingGranularity)
     ? user.ratingGranularity
     : "integer";
+  const legend = isValidLegend(user.ratingLegend) ? user.ratingLegend : [];
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 p-6">
@@ -51,6 +53,23 @@ export default async function ProfilePage({
           </p>
         )}
       </header>
+      {legend.length > 0 && (
+        <section className="mb-4 rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Rating legend
+          </h2>
+          <dl className="space-y-1 text-sm">
+            {legend.map((entry) => (
+              <div key={`${entry.min}-${entry.max}`} className="flex gap-3">
+                <dt className="w-16 shrink-0 font-medium text-[var(--accent)]">
+                  {formatInterval(entry)}
+                </dt>
+                <dd className="text-[var(--muted)]">{entry.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
       <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
         <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
           Recent activity
