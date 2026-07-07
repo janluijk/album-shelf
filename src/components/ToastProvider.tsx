@@ -38,14 +38,14 @@ function ToastCard({
   toast: Toast;
   onDismiss: () => void;
 }) {
-  const [entered, setEntered] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [contentHeight, setContentHeight] = useState(0);
 
   useEffect(() => {
-    const frame = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(frame);
+    if (wrapperRef.current) setContentHeight(wrapperRef.current.scrollHeight);
   }, []);
 
-  const isVisible = entered && !toast.leaving;
+  const isVisible = contentHeight > 0 && !toast.leaving;
   const accentBorder =
     toast.variant === "error"
       ? "border-[var(--accent)]"
@@ -57,27 +57,33 @@ function ToastCard({
 
   return (
     <div
-      className={`w-72 rounded-xl border ${accentBorder} bg-[var(--card)] p-4 text-xs text-[var(--muted)] shadow-lg transition-all duration-300 ${
-        isVisible
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-3 opacity-0"
-      }`}
+      ref={wrapperRef}
+      style={{ height: isVisible ? contentHeight : 0 }}
+      className="overflow-hidden transition-[height] duration-300"
     >
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          {toast.title && (
-            <p className={`mb-1 font-medium ${titleColor}`}>{toast.title}</p>
-          )}
-          <p>{toast.message}</p>
+      <div
+        className={`mt-2 w-72 rounded-xl border ${accentBorder} bg-[var(--card)] p-4 text-xs text-[var(--muted)] shadow-lg transition-all duration-300 ${
+          isVisible
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none translate-y-3 opacity-0"
+        }`}
+      >
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            {toast.title && (
+              <p className={`mb-1 font-medium ${titleColor}`}>{toast.title}</p>
+            )}
+            <p>{toast.message}</p>
+          </div>
+          <button
+            type="button"
+            aria-label="Dismiss notification"
+            onClick={onDismiss}
+            className="cursor-pointer leading-none text-[var(--muted)] hover:text-[var(--foreground)]"
+          >
+            ✕
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="Dismiss notification"
-          onClick={onDismiss}
-          className="cursor-pointer leading-none text-[var(--muted)] hover:text-[var(--foreground)]"
-        >
-          ✕
-        </button>
       </div>
     </div>
   );
@@ -125,7 +131,7 @@ export default function ToastProvider({
       <div
         role="status"
         aria-live="polite"
-        className="fixed bottom-4 right-4 z-50 flex flex-col items-end gap-2"
+        className="fixed bottom-4 right-4 z-50 flex flex-col items-end"
       >
         {toasts.map((toast) => (
           <ToastCard
