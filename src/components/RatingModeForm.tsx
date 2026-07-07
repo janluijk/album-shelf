@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   GRANULARITY_LABELS,
   RATING_GRANULARITIES,
   type RatingGranularity,
 } from "@/lib/ratings";
+import { useNotify } from "@/components/ToastProvider";
 
 type RatingModeFormProps = {
   initialMode: RatingGranularity;
@@ -14,14 +15,7 @@ type RatingModeFormProps = {
 export default function RatingModeForm({ initialMode }: RatingModeFormProps) {
   const [mode, setMode] = useState<RatingGranularity>(initialMode);
   const [saving, setSaving] = useState(false);
-  const [notice, setNotice] = useState(false);
-  const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (noticeTimer.current) clearTimeout(noticeTimer.current);
-    };
-  }, []);
+  const notify = useNotify();
 
   async function choose(next: RatingGranularity) {
     if (next === mode || saving) return;
@@ -36,11 +30,18 @@ export default function RatingModeForm({ initialMode }: RatingModeFormProps) {
     setSaving(false);
     if (!response.ok) {
       setMode(previous);
+      notify({
+        title: "Could not save",
+        message: "Your rating mode was not changed. Please try again.",
+        variant: "error",
+      });
       return;
     }
-    setNotice(true);
-    if (noticeTimer.current) clearTimeout(noticeTimer.current);
-    noticeTimer.current = setTimeout(() => setNotice(false), 6000);
+    notify({
+      title: "Ratings are kept exactly",
+      message:
+        "Switching the mode only changes how ratings look — whole stars round down, half stars round to the nearest ½, and decimal restores the exact value. Nothing you've rated is lost.",
+    });
   }
 
   return (
@@ -63,23 +64,6 @@ export default function RatingModeForm({ initialMode }: RatingModeFormProps) {
       <p className="text-xs text-[var(--muted)]">
         How you rate albums: whole stars, half stars, or decimal form.
       </p>
-
-      <div
-        role="status"
-        aria-live="polite"
-        className={`fixed bottom-4 right-4 z-50 max-w-xs rounded-xl border border-[var(--card-border)] bg-[var(--card)] p-4 text-xs text-[var(--muted)] shadow-lg transition-all duration-300 ${
-          notice
-            ? "translate-y-0 opacity-100"
-            : "pointer-events-none translate-y-3 opacity-0"
-        }`}
-      >
-        <p className="mb-1 font-medium text-[var(--foreground)]">
-          Ratings are kept exactly
-        </p>
-        Switching the mode only changes how ratings look — whole stars round
-        down, half stars round to the nearest ½, and decimal restores the exact
-        value. Nothing you&apos;ve rated is lost.
-      </div>
     </div>
   );
 }
