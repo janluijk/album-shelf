@@ -3,6 +3,10 @@
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "backlog": {
+      "command": "npx",
+      "args": ["-y", "backlog.md", "mcp", "start"]
     }
   }
 }

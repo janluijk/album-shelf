@@ -6,6 +6,9 @@ on:
     paths-ignore:
       - 'backlog/**'
       - '**.md'
+      - '.claude/**'
+      - '.mcp.json'
+      - 'scripts/*.ps1'
 
 concurrency:
   group: production

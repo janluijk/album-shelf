@@ -78,3 +78,10 @@ In Claude Code web sessions there is no `.env`: `scripts/web-setup.sh` installs 
 - `next build` needs no database env: `src/auth.ts` builds the Drizzle adapter lazily via NextAuth's function config, so the build steps run without `DATABASE_URL`. Only the migration steps (`db:migrate`) pass it explicitly.
 
 For pipeline operations and troubleshooting, use the `pipeline` skill; for the develop-and-ship workflow, use the `ship` skill (both in `.claude/skills/`).
+
+## Local two-agent workflow
+
+Local development runs as two long-lived Claude Code sessions, defined in `.claude/agents/`. They satisfy the one-owner-per-area rule by working in separate checkouts on disjoint files:
+
+- **backlog** (`scripts/backlog-agent.ps1`) — captures and grooms Backlog.md tasks via the backlog MCP server, pushes `backlog/`-only commits straight to `main` (build-free: workflows ignore `backlog/**` and `**.md`). Runs on haiku at low effort in a dedicated clone `../album-shelf-backlog` that always stays on `main`.
+- **dev** (`scripts/dev-agent.ps1`) — picks a task, implements on an issue branch in this checkout, ships a PR via the `ship` skill, and iterates on the user's PR review feedback. `/pr-info` reports the PR URL, branch, and preview deployment URL.
