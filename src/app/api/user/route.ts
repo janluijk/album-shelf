@@ -5,6 +5,7 @@ import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { isValidUsername, usernameRules } from "@/lib/usernames";
 import { isValidGranularity } from "@/lib/ratings";
+import { bioMaxLength, isValidBio, normalizeBio } from "@/lib/bio";
 
 export async function PATCH(request: Request) {
   const session = await auth();
@@ -15,7 +16,11 @@ export async function PATCH(request: Request) {
 
   const db = getDb();
   const body = await request.json();
-  const updates: { username?: string; ratingGranularity?: string } = {};
+  const updates: {
+    username?: string;
+    ratingGranularity?: string;
+    bio?: string | null;
+  } = {};
 
   if ("username" in body) {
     if (!isValidUsername(body.username)) {
@@ -43,6 +48,16 @@ export async function PATCH(request: Request) {
     updates.ratingGranularity = body.ratingGranularity;
   }
 
+  if ("bio" in body) {
+    if (!isValidBio(body.bio)) {
+      return NextResponse.json(
+        { error: `Bio must be text of at most ${bioMaxLength} characters` },
+        { status: 400 },
+      );
+    }
+    updates.bio = normalizeBio(body.bio);
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid updates" }, { status: 400 });
   }
@@ -54,6 +69,7 @@ export async function PATCH(request: Request) {
     .returning({
       username: users.username,
       ratingGranularity: users.ratingGranularity,
+      bio: users.bio,
     });
   return NextResponse.json(updated);
 }

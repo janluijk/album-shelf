@@ -45,6 +45,11 @@ export default async function ProfilePage({
           @{user.username} · {history.length} album
           {history.length === 1 ? "" : "s"} listened
         </p>
+        {user.bio && (
+          <p className="mt-3 whitespace-pre-line text-sm text-[var(--foreground)]">
+            {user.bio}
+          </p>
+        )}
       </header>
       <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
         <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">

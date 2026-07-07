@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import UsernameForm from "@/components/UsernameForm";
+import BioForm from "@/components/BioForm";
 import RatingModeForm from "@/components/RatingModeForm";
 import { isValidGranularity } from "@/lib/ratings";
 
@@ -51,6 +52,12 @@ export default async function SettingsPage() {
             Username
           </h2>
           <UsernameForm initialUsername={user.username} />
+        </section>
+        <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Bio
+          </h2>
+          <BioForm initialBio={user.bio} />
         </section>
         <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
           <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
