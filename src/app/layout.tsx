@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import ToastProvider from "@/components/ToastProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +29,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        {children}
+        <ToastProvider>{children}</ToastProvider>
         <footer className="mt-auto border-t border-[var(--card-border)]">
           <div className="mx-auto flex w-full max-w-5xl items-center justify-between p-6 text-xs text-[var(--muted)]">
             <span>Album Shelf</span>
