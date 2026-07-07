@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { albums } from "@/lib/db/schema";
 import { nextPosition } from "@/lib/albums";
-import { lookupCoverUrl } from "@/lib/coverArt";
+import { lookupAlbumMetadata } from "@/lib/coverArt";
 
 export async function POST(request: Request) {
   const session = await auth();
@@ -25,13 +25,20 @@ export async function POST(request: Request) {
   }
 
   const db = getDb();
-  const [existing, coverUrl] = await Promise.all([
+  const [existing, metadata] = await Promise.all([
     db.query.albums.findMany({ where: eq(albums.userId, userId) }),
-    lookupCoverUrl(title, artist),
+    lookupAlbumMetadata(title, artist),
   ]);
   const [created] = await db
     .insert(albums)
-    .values({ userId, title, artist, coverUrl, position: nextPosition(existing) })
+    .values({
+      userId,
+      title,
+      artist,
+      coverUrl: metadata.coverUrl,
+      releaseYear: metadata.releaseYear,
+      position: nextPosition(existing),
+    })
     .returning();
   return NextResponse.json(created, { status: 201 });
 }
