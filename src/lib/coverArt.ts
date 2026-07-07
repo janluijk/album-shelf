@@ -7,7 +7,7 @@ export function escapeLucene(value: string): string {
 
 export function buildSearchUrl(title: string, artist: string): string {
   const query = `releasegroup:"${escapeLucene(title)}" AND artist:"${escapeLucene(artist)}"`;
-  const params = new URLSearchParams({ query, fmt: "json", limit: "1" });
+  const params = new URLSearchParams({ query, fmt: "json", limit: "5" });
   return `https://musicbrainz.org/ws/2/release-group/?${params.toString()}`;
 }
 
@@ -15,13 +15,12 @@ export type ReleaseGroupSearchResponse = {
   "release-groups"?: { id: string; score?: number }[];
 };
 
-export function pickReleaseGroupId(
+export function pickReleaseGroupIds(
   response: ReleaseGroupSearchResponse,
-): string | null {
-  const first = response["release-groups"]?.[0];
-  const isConfidentMatch = !!first && (first.score ?? 0) >= 90;
-  if (!isConfidentMatch) return null;
-  return first.id;
+): string[] {
+  return (response["release-groups"] ?? [])
+    .filter((group) => (group.score ?? 0) >= 90)
+    .map((group) => group.id);
 }
 
 export function coverArtUrl(releaseGroupId: string): string {
@@ -39,18 +38,18 @@ export async function lookupCoverUrl(
     });
     if (!searchResponse.ok) return null;
 
-    const releaseGroupId = pickReleaseGroupId(await searchResponse.json());
-    if (!releaseGroupId) return null;
-
-    const candidateUrl = coverArtUrl(releaseGroupId);
-    const coverResponse = await fetch(candidateUrl, {
-      method: "HEAD",
-      redirect: "follow",
-      signal: AbortSignal.timeout(requestTimeoutMs),
-    });
-    if (!coverResponse.ok) return null;
-
-    return candidateUrl;
+    for (const releaseGroupId of pickReleaseGroupIds(
+      await searchResponse.json(),
+    )) {
+      const candidateUrl = coverArtUrl(releaseGroupId);
+      const coverResponse = await fetch(candidateUrl, {
+        method: "HEAD",
+        redirect: "follow",
+        signal: AbortSignal.timeout(requestTimeoutMs),
+      });
+      if (coverResponse.ok) return candidateUrl;
+    }
+    return null;
   } catch {
     return null;
   }
