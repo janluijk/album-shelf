@@ -30,7 +30,6 @@ Everything deploys through GitHub Actions — disable Vercel's own git integrati
 ```
 PR opened ──> CI (lint, typecheck, unit tests, build)
           ──> Preview: Neon branch preview/pr-N ─> migrate ─> vercel deploy ─> Playwright e2e ─> URL comment
-          ──> Claude Review (AI code review comment)
 PR closed ──> Neon branch deleted
 merge to main ──> tests ─> migrate production DB ─> vercel deploy --prod
 @claude in issues/PR comments ──> Claude implements or answers
@@ -45,7 +44,7 @@ merge to main ──> tests ─> migrate production DB ─> vercel deploy --prod
 | `NEON_API_KEY` / `NEON_PROJECT_ID` | Neon branch create/delete per PR |
 | `DATABASE_URL` | Production Neon connection string (migrations on deploy) |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Lets Playwright through Vercel deployment protection |
-| `ANTHROPIC_API_KEY` | Claude review and `@claude` workflows |
+| `ANTHROPIC_API_KEY` | `@claude` workflow |
 
 Vercel project env vars (production + preview): `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`. Preview deploys get their `DATABASE_URL` overridden per-deployment to the PR's Neon branch.
 
