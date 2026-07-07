@@ -3,7 +3,7 @@ import {
   buildSearchUrl,
   coverArtUrl,
   escapeLucene,
-  pickReleaseGroupId,
+  pickReleaseGroupIds,
 } from "./coverArt";
 
 describe("escapeLucene", () => {
@@ -27,28 +27,34 @@ describe("buildSearchUrl", () => {
       'releasegroup:"OK Computer" AND artist:"Radiohead"',
     );
     expect(url.searchParams.get("fmt")).toBe("json");
-    expect(url.searchParams.get("limit")).toBe("1");
+    expect(url.searchParams.get("limit")).toBe("5");
   });
 });
 
-describe("pickReleaseGroupId", () => {
-  it("returns the id of a confident match", () => {
+describe("pickReleaseGroupIds", () => {
+  it("returns the ids of confident matches in order", () => {
     const response = {
-      "release-groups": [{ id: "abc-123", score: 100 }],
+      "release-groups": [
+        { id: "abc-123", score: 100 },
+        { id: "def-456", score: 94 },
+      ],
     };
-    expect(pickReleaseGroupId(response)).toBe("abc-123");
+    expect(pickReleaseGroupIds(response)).toEqual(["abc-123", "def-456"]);
   });
 
-  it("rejects low-confidence matches", () => {
+  it("filters out low-confidence matches", () => {
     const response = {
-      "release-groups": [{ id: "abc-123", score: 60 }],
+      "release-groups": [
+        { id: "abc-123", score: 100 },
+        { id: "def-456", score: 60 },
+      ],
     };
-    expect(pickReleaseGroupId(response)).toBeNull();
+    expect(pickReleaseGroupIds(response)).toEqual(["abc-123"]);
   });
 
   it("handles empty and missing result lists", () => {
-    expect(pickReleaseGroupId({ "release-groups": [] })).toBeNull();
-    expect(pickReleaseGroupId({})).toBeNull();
+    expect(pickReleaseGroupIds({ "release-groups": [] })).toEqual([]);
+    expect(pickReleaseGroupIds({})).toEqual([]);
   });
 });
 
