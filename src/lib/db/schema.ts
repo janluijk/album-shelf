@@ -76,6 +76,7 @@ export const albums = pgTable("album", {
   rating: numeric("rating", { precision: 2, scale: 1, mode: "number" }),
   note: text("note"),
   coverUrl: text("cover_url"),
+  releaseYear: integer("release_year"),
   listenedOn: date("listened_on"),
   position: integer("position").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),

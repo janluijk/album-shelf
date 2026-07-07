@@ -3,7 +3,8 @@ import {
   buildSearchUrl,
   coverArtUrl,
   escapeLucene,
-  pickReleaseGroupIds,
+  parseReleaseYear,
+  pickConfidentReleaseGroups,
 } from "./coverArt";
 
 describe("escapeLucene", () => {
@@ -31,15 +32,18 @@ describe("buildSearchUrl", () => {
   });
 });
 
-describe("pickReleaseGroupIds", () => {
-  it("returns the ids of confident matches in order", () => {
+describe("pickConfidentReleaseGroups", () => {
+  it("returns confident matches in order", () => {
     const response = {
       "release-groups": [
         { id: "abc-123", score: 100 },
         { id: "def-456", score: 94 },
       ],
     };
-    expect(pickReleaseGroupIds(response)).toEqual(["abc-123", "def-456"]);
+    expect(pickConfidentReleaseGroups(response).map((g) => g.id)).toEqual([
+      "abc-123",
+      "def-456",
+    ]);
   });
 
   it("filters out low-confidence matches", () => {
@@ -49,12 +53,31 @@ describe("pickReleaseGroupIds", () => {
         { id: "def-456", score: 60 },
       ],
     };
-    expect(pickReleaseGroupIds(response)).toEqual(["abc-123"]);
+    expect(pickConfidentReleaseGroups(response).map((g) => g.id)).toEqual([
+      "abc-123",
+    ]);
   });
 
   it("handles empty and missing result lists", () => {
-    expect(pickReleaseGroupIds({ "release-groups": [] })).toEqual([]);
-    expect(pickReleaseGroupIds({})).toEqual([]);
+    expect(pickConfidentReleaseGroups({ "release-groups": [] })).toEqual([]);
+    expect(pickConfidentReleaseGroups({})).toEqual([]);
+  });
+});
+
+describe("parseReleaseYear", () => {
+  it("parses the year from a full date", () => {
+    expect(parseReleaseYear("1997-06-16")).toBe(1997);
+  });
+
+  it("parses a year-only date", () => {
+    expect(parseReleaseYear("1966")).toBe(1966);
+  });
+
+  it("rejects missing and malformed dates", () => {
+    expect(parseReleaseYear(undefined)).toBe(null);
+    expect(parseReleaseYear("")).toBe(null);
+    expect(parseReleaseYear("????")).toBe(null);
+    expect(parseReleaseYear("12")).toBe(null);
   });
 });
 
