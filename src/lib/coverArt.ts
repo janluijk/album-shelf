@@ -11,46 +11,68 @@ export function buildSearchUrl(title: string, artist: string): string {
   return `https://musicbrainz.org/ws/2/release-group/?${params.toString()}`;
 }
 
-export type ReleaseGroupSearchResponse = {
-  "release-groups"?: { id: string; score?: number }[];
+export type ReleaseGroup = {
+  id: string;
+  score?: number;
+  "first-release-date"?: string;
 };
 
-export function pickReleaseGroupIds(
+export type ReleaseGroupSearchResponse = {
+  "release-groups"?: ReleaseGroup[];
+};
+
+export function pickConfidentReleaseGroups(
   response: ReleaseGroupSearchResponse,
-): string[] {
-  return (response["release-groups"] ?? [])
-    .filter((group) => (group.score ?? 0) >= 90)
-    .map((group) => group.id);
+): ReleaseGroup[] {
+  return (response["release-groups"] ?? []).filter(
+    (group) => (group.score ?? 0) >= 90,
+  );
+}
+
+export function parseReleaseYear(value: string | undefined): number | null {
+  const year = Number(value?.slice(0, 4));
+  const isPlausibleYear =
+    Number.isInteger(year) && year >= 1000 && year <= 2999;
+  return isPlausibleYear ? year : null;
 }
 
 export function coverArtUrl(releaseGroupId: string): string {
   return `https://coverartarchive.org/release-group/${releaseGroupId}/front-250`;
 }
 
-export async function lookupCoverUrl(
+export type AlbumMetadata = {
+  coverUrl: string | null;
+  releaseYear: number | null;
+};
+
+export async function lookupAlbumMetadata(
   title: string,
   artist: string,
-): Promise<string | null> {
+): Promise<AlbumMetadata> {
   try {
     const searchResponse = await fetch(buildSearchUrl(title, artist), {
       headers: { "User-Agent": userAgent },
       signal: AbortSignal.timeout(requestTimeoutMs),
     });
-    if (!searchResponse.ok) return null;
+    if (!searchResponse.ok) return { coverUrl: null, releaseYear: null };
 
-    for (const releaseGroupId of pickReleaseGroupIds(
-      await searchResponse.json(),
-    )) {
-      const candidateUrl = coverArtUrl(releaseGroupId);
+    const groups = pickConfidentReleaseGroups(await searchResponse.json());
+    const releaseYear =
+      groups
+        .map((group) => parseReleaseYear(group["first-release-date"]))
+        .find((year) => year !== null) ?? null;
+
+    for (const group of groups) {
+      const candidateUrl = coverArtUrl(group.id);
       const coverResponse = await fetch(candidateUrl, {
         method: "HEAD",
         redirect: "follow",
         signal: AbortSignal.timeout(requestTimeoutMs),
       });
-      if (coverResponse.ok) return candidateUrl;
+      if (coverResponse.ok) return { coverUrl: candidateUrl, releaseYear };
     }
-    return null;
+    return { coverUrl: null, releaseYear };
   } catch {
-    return null;
+    return { coverUrl: null, releaseYear: null };
   }
 }

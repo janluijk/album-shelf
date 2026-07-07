@@ -1,6 +1,6 @@
 {
-  "id": "ab267171-9a09-4fad-9ab8-0efbe13b2cac",
-  "prevId": "d06f478f-8a61-4bbc-9857-0e85ee77d2e2",
+  "id": "9af12e67-7999-413e-9089-2ec37d41f4ca",
+  "prevId": "ab267171-9a09-4fad-9ab8-0efbe13b2cac",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -308,6 +308,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "shelf_public": {
+          "name": "shelf_public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         }
       },
       "indexes": {},

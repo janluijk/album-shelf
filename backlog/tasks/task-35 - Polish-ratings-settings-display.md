@@ -1,5 +1,5 @@
 ---
-id: TASK-33
+id: TASK-35
 title: Polish ratings settings display
 status: To Do
 assignee: []
@@ -8,7 +8,7 @@ labels:
   - ui-polish
 dependencies: []
 priority: medium
-ordinal: 32000
+ordinal: 35000
 ---
 
 ## Description
