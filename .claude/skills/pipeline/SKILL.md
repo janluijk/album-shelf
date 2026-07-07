@@ -41,6 +41,7 @@ npx neonctl branches list --project-id purple-dawn-20749038
 | Playwright e2e gets 401 on preview | Vercel deployment protection | `VERCEL_AUTOMATION_BYPASS_SECRET` must be set; playwright.config sends the bypass header |
 | Production sign-in fails | OAuth callback mismatch | GitHub OAuth app callback must be exactly `https://album-shelf-seven.vercel.app/api/auth/callback/github` |
 | Rollback needed | bad deploy on main | `vercel rollback` (or promote a previous deployment in the Vercel dashboard), then revert the commit on main |
+| Preview migrate step fails after a PR's migration was regenerated | the PR's Neon branch still has the old migration recorded in `drizzle.__drizzle_migrations`, so the rewritten journal no longer matches | close and reopen the PR: close triggers `preview-cleanup.yml` (deletes the stale Neon branch), reopen recreates it fresh from production so only the new migrations apply |
 
 ## Schema migrations
 
