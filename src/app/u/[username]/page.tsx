@@ -4,7 +4,7 @@ import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
 import { isValidGranularity } from "@/lib/ratings";
-import { formatSegment, isValidLegend, segmentsFor } from "@/lib/ratingLegend";
+import { isValidLegend, legendEntries } from "@/lib/ratingLegend";
 import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 
@@ -36,7 +36,7 @@ export default async function ProfilePage({
     ? user.ratingGranularity
     : "integer";
   const legend = isValidLegend(user.ratingLegend)
-    ? segmentsFor(user.ratingLegend, ratingMode)
+    ? legendEntries(user.ratingLegend)
     : [];
 
   return (
@@ -60,11 +60,11 @@ export default async function ProfilePage({
           <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
             Rating legend
           </h2>
-          <dl className="space-y-1 text-sm">
+          <dl className="space-y-1.5 text-sm">
             {legend.map((entry) => (
-              <div key={`${entry.min}-${entry.max}`} className="flex gap-3">
-                <dt className="w-16 shrink-0 font-medium text-[var(--accent)]">
-                  {formatSegment(entry, ratingMode)}
+              <div key={entry.stars} className="flex items-center gap-3">
+                <dt className="shrink-0">
+                  <StarRating value={entry.stars} />
                 </dt>
                 <dd className="text-[var(--muted)]">{entry.label}</dd>
               </div>

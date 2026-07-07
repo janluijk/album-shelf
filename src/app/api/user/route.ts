@@ -69,7 +69,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json(
         {
           error:
-            "Invalid rating legend. Cut the 1–5 scale into ordered segments with a short description each.",
+            "Invalid rating legend. Provide a short description for each star rating from 1 to 5.",
         },
         { status: 400 },
       );

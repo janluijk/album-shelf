@@ -81,11 +81,6 @@ export default async function SettingsPage() {
             initialLegend={
               isValidLegend(user.ratingLegend) ? user.ratingLegend : null
             }
-            mode={
-              isValidGranularity(user.ratingGranularity)
-                ? user.ratingGranularity
-                : "integer"
-            }
           />
         </section>
       </div>
