@@ -19,7 +19,6 @@ description: Operate and troubleshoot the album-shelf deployment pipeline — Gi
 | `preview.yml` | PR | Neon branch → migrate → vercel build+deploy → Playwright e2e → URL comment |
 | `preview-cleanup.yml` | PR closed | delete the Neon branch |
 | `production.yml` | push main | tests → migrate prod DB → vercel deploy --prod |
-| `claude-review.yml` | PR opened/ready | AI code review comment |
 | `claude.yml` | @claude mention | Claude implements/answers in the issue/PR |
 
 ## Everyday commands
@@ -28,7 +27,7 @@ description: Operate and troubleshoot the album-shelf deployment pipeline — Gi
 gh pr checks <n> --watch          # check status of a PR's pipeline
 gh run list --limit 10            # recent workflow runs
 gh run view <id> --log-failed     # why a run failed
-gh run rerun <id>                 # rerun (e.g. review after new commits)
+gh run rerun <id>                 # rerun a failed or stale run
 vercel ls / vercel logs <url>     # deployments and runtime logs
 npx neonctl branches list --project-id purple-dawn-20749038
 ```
