@@ -48,4 +48,4 @@ gh pr create --title "..." --body "..."
 gh pr checks <n> --watch
 ```
 
-The PR pipeline: `quality` (CI) → `preview` (Neon branch `preview/pr-N` + migrate + Vercel preview + Playwright e2e + URL comment) → `review` (Claude). All green before merge. The review workflow only fires on PR open — after fixing findings, rerun it with `gh run rerun <run-id>` if a fresh review is wanted.
+The PR pipeline: `quality` (CI) → `preview` (Neon branch `preview/pr-N` + migrate + Vercel preview + Playwright e2e + URL comment). All green before merge.

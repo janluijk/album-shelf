@@ -45,7 +45,7 @@ A standalone web app to queue, rate and share music albums. Users sign in with G
 ## Workflow and quality bar
 
 - Work happens on branches + PRs into `main`; `main` deploys to production automatically
-- The pipeline per PR: CI (lint, typecheck, unit tests, build) → preview deploy on an isolated Neon database branch → Playwright e2e against the preview URL → Claude code review. All must be green before merge.
+- The pipeline per PR: CI (lint, typecheck, unit tests, build) → preview deploy on an isolated Neon database branch → Playwright e2e against the preview URL. All must be green before merge.
 - The task backlog lives in `backlog/` (managed with the `backlog` CLI — see CLAUDE.md). Pick up tasks from there and update their status as you work.
 - Before writing code against Next.js, Tailwind v4, Drizzle or Auth.js APIs you are not certain about, resolve current docs via the Context7 MCP (configured in `.mcp.json`) instead of relying on memory — these libraries move fast.
 - To verify UI changes visually, use the Playwright MCP against `npm run dev`.
