@@ -9,7 +9,7 @@ import { bioMaxLength, isValidBio, normalizeBio } from "@/lib/bio";
 import {
   isValidLegend,
   normalizeLegend,
-  type LegendInterval,
+  type RatingLegend,
 } from "@/lib/ratingLegend";
 
 export async function PATCH(request: Request) {
@@ -25,7 +25,7 @@ export async function PATCH(request: Request) {
     username?: string;
     ratingGranularity?: string;
     bio?: string | null;
-    ratingLegend?: LegendInterval[];
+    ratingLegend?: RatingLegend | null;
   } = {};
 
   if ("username" in body) {
@@ -65,16 +65,17 @@ export async function PATCH(request: Request) {
   }
 
   if ("ratingLegend" in body) {
-    if (!isValidLegend(body.ratingLegend)) {
+    if (body.ratingLegend !== null && !isValidLegend(body.ratingLegend)) {
       return NextResponse.json(
         {
           error:
-            "Invalid rating legend. Use non-overlapping intervals between 1 and 5 with a short description each.",
+            "Invalid rating legend. Cut the 1–5 scale into ordered segments with a short description each.",
         },
         { status: 400 },
       );
     }
-    updates.ratingLegend = normalizeLegend(body.ratingLegend);
+    updates.ratingLegend =
+      body.ratingLegend === null ? null : normalizeLegend(body.ratingLegend);
   }
 
   if (Object.keys(updates).length === 0) {

@@ -1,81 +1,55 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import type { RatingGranularity } from "@/lib/ratings";
 import {
+  allowedCutsBetween,
+  formatSegment,
+  formatValue,
   isValidLegend,
-  legendLabelMaxLength,
-  legendMaxIntervals,
-  type LegendInterval,
+  moveCut,
+  normalizeLegend,
+  removeCut,
+  segmentRanges,
+  snapToGrid,
+  splitSegment,
+  stepFor,
+  type RatingLegend,
 } from "@/lib/ratingLegend";
-
-type LegendRow = {
-  min: string;
-  max: string;
-  label: string;
-};
+import { useNotify } from "@/components/ToastProvider";
 
 type RatingLegendFormProps = {
-  initialLegend: LegendInterval[];
+  initialLegend: RatingLegend | null;
+  mode: RatingGranularity;
 };
 
-function toRows(legend: LegendInterval[]): LegendRow[] {
-  return legend.map((entry) => ({
-    min: String(entry.min),
-    max: String(entry.max),
-    label: entry.label,
-  }));
-}
+const segmentTints = [70, 35, 55, 20, 45, 80, 30, 60];
 
-function toLegend(rows: LegendRow[]): LegendInterval[] {
-  return rows.map((row) => ({
-    min: Number(row.min),
-    max: Number(row.max),
-    label: row.label,
-  }));
+function tintFor(index: number): string {
+  return `color-mix(in srgb, var(--accent) ${segmentTints[index % segmentTints.length]}%, transparent)`;
 }
 
 export default function RatingLegendForm({
   initialLegend,
+  mode,
 }: RatingLegendFormProps) {
-  const [rows, setRows] = useState<LegendRow[]>(toRows(initialLegend));
-  const [saved, setSaved] = useState<LegendInterval[]>(initialLegend);
+  const [legend, setLegend] = useState<RatingLegend | null>(initialLegend);
+  const [saved, setSaved] = useState<RatingLegend | null>(initialLegend);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const barRef = useRef<HTMLDivElement>(null);
+  const notify = useNotify();
 
-  const candidate = toLegend(rows);
-  const isUnchanged = JSON.stringify(candidate) === JSON.stringify(saved);
+  const step = stepFor(mode);
+  const isUnchanged = JSON.stringify(legend) === JSON.stringify(saved);
 
-  function updateRow(index: number, patch: Partial<LegendRow>) {
-    setRows((current) =>
-      current.map((row, i) => (i === index ? { ...row, ...patch } : row)),
-    );
-    setError(null);
-  }
-
-  function addRow() {
-    setRows((current) => [...current, { min: "", max: "", label: "" }]);
-    setError(null);
-  }
-
-  function removeRow(index: number) {
-    setRows((current) => current.filter((_, i) => i !== index));
-    setError(null);
-  }
-
-  async function save() {
-    if (isUnchanged || saving) return;
-    if (!isValidLegend(candidate)) {
-      setError(
-        "Use non-overlapping intervals between 1 and 5 (one decimal at most) with a short description each.",
-      );
-      return;
-    }
+  async function persist(next: RatingLegend | null) {
     setSaving(true);
     setError(null);
     const response = await fetch("/api/user", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ratingLegend: candidate }),
+      body: JSON.stringify({ ratingLegend: next }),
     });
     setSaving(false);
     if (!response.ok) {
@@ -83,65 +57,214 @@ export default function RatingLegendForm({
       setError(body?.error ?? "Could not save rating legend");
       return;
     }
-    const updated: { ratingLegend: LegendInterval[] | null } =
+    const updated: { ratingLegend: RatingLegend | null } =
       await response.json();
-    const next = updated.ratingLegend ?? [];
-    setSaved(next);
-    setRows(toRows(next));
+    setLegend(updated.ratingLegend);
+    setSaved(updated.ratingLegend);
+    notify({
+      title: "Rating legend saved",
+      message: next
+        ? "Your legend is now shown on your public shelf."
+        : "Your legend was removed.",
+      variant: "success",
+    });
   }
+
+  function save() {
+    if (!legend || saving) return;
+    const normalized = normalizeLegend(legend);
+    if (!isValidLegend(normalized)) {
+      setError("Give every segment a short description before saving.");
+      return;
+    }
+    persist(normalized);
+  }
+
+  function update(next: RatingLegend | null) {
+    setLegend(next);
+    setError(null);
+  }
+
+  function dragCut(cutIndex: number, clientX: number) {
+    const bar = barRef.current;
+    if (!bar || !legend) return;
+    const rect = bar.getBoundingClientRect();
+    const span = 4 + step;
+    const raw = 1 + ((clientX - rect.left) / rect.width) * span;
+    update(moveCut(legend, cutIndex, snapToGrid(raw, mode)));
+  }
+
+  if (!legend) {
+    return (
+      <div>
+        <p className="text-xs text-[var(--muted)]">
+          Describe what your ratings mean by cutting the 1–5 scale into labeled
+          intervals, shown on your public shelf.
+        </p>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => update({ cuts: [], labels: [""] })}
+            className="cursor-pointer rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+          >
+            Create legend
+          </button>
+          {saved && (
+            <button
+              type="button"
+              onClick={() => persist(null)}
+              disabled={saving}
+              className="cursor-pointer rounded-lg bg-[var(--accent)] text-white px-4 py-2 text-sm font-medium disabled:opacity-60"
+            >
+              {saving ? "Removing…" : "Confirm removal"}
+            </button>
+          )}
+        </div>
+        {error && <p className="mt-2 text-xs text-[var(--accent)]">{error}</p>}
+      </div>
+    );
+  }
+
+  const span = 4 + step;
+  const boundaries = [1, ...legend.cuts, 1 + span];
+  const ranges = segmentRanges(legend, mode);
+  const stars = [1, 2, 3, 4, 5];
 
   return (
     <div>
+      <div className="relative mb-6 select-none">
+        <div ref={barRef} className="flex h-9 overflow-hidden rounded-lg">
+          {legend.labels.map((_, i) => (
+            <div
+              key={i}
+              style={{
+                width: `${((boundaries[i + 1] - boundaries[i]) / span) * 100}%`,
+                background: tintFor(i),
+              }}
+            />
+          ))}
+        </div>
+        {legend.cuts.map((cut, i) => (
+          <button
+            key={i}
+            type="button"
+            aria-label={`Boundary at ${formatValue(cut, "decimal")}, use arrow keys to move`}
+            onPointerDown={(event) =>
+              event.currentTarget.setPointerCapture(event.pointerId)
+            }
+            onPointerMove={(event) => {
+              if (!event.currentTarget.hasPointerCapture(event.pointerId))
+                return;
+              dragCut(i, event.clientX);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft")
+                update(moveCut(legend, i, cut - step));
+              if (event.key === "ArrowRight")
+                update(moveCut(legend, i, cut + step));
+            }}
+            style={{ left: `${((cut - 1) / span) * 100}%` }}
+            className="absolute -top-1 h-11 w-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-full border border-[var(--card-border)] bg-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none"
+          />
+        ))}
+        <div
+          aria-hidden
+          className="relative mt-1 h-4 text-xs text-[var(--muted)]"
+        >
+          {stars.map((star) => (
+            <span
+              key={star}
+              style={{ left: `${((star - 1 + step / 2) / span) * 100}%` }}
+              className="absolute -translate-x-1/2"
+            >
+              {star}★
+            </span>
+          ))}
+        </div>
+      </div>
+
       <div className="space-y-2">
-        {rows.map((row, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <input
-              value={row.min}
-              onChange={(event) => updateRow(index, { min: event.target.value })}
-              inputMode="decimal"
-              placeholder="1"
-              aria-label={`Interval ${index + 1} from`}
-              className="w-14 bg-transparent border border-[var(--card-border)] rounded-lg px-2 py-2 text-sm text-center outline-none focus:border-[var(--accent)]"
+        {legend.labels.map((label, i) => (
+          <div key={i} className="flex items-center gap-2">
+            <span
+              aria-hidden
+              style={{ background: tintFor(i) }}
+              className="h-4 w-4 shrink-0 rounded"
             />
-            <span className="text-xs text-[var(--muted)]">–</span>
+            {i === 0 ? (
+              <span className="w-24 shrink-0 text-xs text-[var(--muted)]">
+                {ranges[i]
+                  ? formatSegment({ ...ranges[i], label }, mode)
+                  : "no values"}
+              </span>
+            ) : (
+              <span className="flex w-24 shrink-0 items-center gap-1 text-xs text-[var(--muted)]">
+                <select
+                  value={legend.cuts[i - 1]}
+                  aria-label={`Start of segment ${i + 1}`}
+                  onChange={(event) =>
+                    update(moveCut(legend, i - 1, Number(event.target.value)))
+                  }
+                  className="bg-transparent border border-[var(--card-border)] rounded px-1 py-0.5 text-xs outline-none focus:border-[var(--accent)]"
+                >
+                  {!allowedCutsBetween(legend, i - 1, mode).includes(
+                    legend.cuts[i - 1],
+                  ) && (
+                    <option value={legend.cuts[i - 1]}>
+                      {formatValue(legend.cuts[i - 1], "decimal")}
+                    </option>
+                  )}
+                  {allowedCutsBetween(legend, i - 1, mode).map((value) => (
+                    <option key={value} value={value}>
+                      {formatValue(value, mode)}
+                    </option>
+                  ))}
+                </select>
+                <span>
+                  –{ranges[i] ? formatValue(ranges[i].max, mode) : "…"}
+                </span>
+              </span>
+            )}
             <input
-              value={row.max}
-              onChange={(event) => updateRow(index, { max: event.target.value })}
-              inputMode="decimal"
-              placeholder="1.5"
-              aria-label={`Interval ${index + 1} to`}
-              className="w-14 bg-transparent border border-[var(--card-border)] rounded-lg px-2 py-2 text-sm text-center outline-none focus:border-[var(--accent)]"
-            />
-            <input
-              value={row.label}
+              value={label}
               onChange={(event) =>
-                updateRow(index, { label: event.target.value })
+                update({
+                  ...legend,
+                  labels: legend.labels.map((current, labelIndex) =>
+                    labelIndex === i ? event.target.value : current,
+                  ),
+                })
               }
-              maxLength={legendLabelMaxLength}
-              placeholder="did not finish"
-              aria-label={`Interval ${index + 1} description`}
+              placeholder="what this range means"
+              aria-label={`Description for segment ${i + 1}`}
               className="flex-1 min-w-0 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
             />
             <button
               type="button"
-              onClick={() => removeRow(index)}
-              aria-label={`Remove interval ${index + 1}`}
-              className="shrink-0 cursor-pointer rounded-lg border border-[var(--card-border)] px-3 py-2 text-sm text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+              onClick={() => {
+                const next = splitSegment(legend, i, mode);
+                if (next) update(next);
+              }}
+              disabled={splitSegment(legend, i, mode) === null}
+              aria-label={`Split segment ${i + 1}`}
+              className="shrink-0 cursor-pointer rounded-lg border border-[var(--card-border)] px-3 py-2 text-sm text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-default disabled:opacity-40"
+            >
+              Split
+            </button>
+            <button
+              type="button"
+              onClick={() => update(removeCut(legend, i - 1))}
+              disabled={i === 0}
+              aria-label={`Merge segment ${i + 1} into the previous one`}
+              className="shrink-0 cursor-pointer rounded-lg border border-[var(--card-border)] px-3 py-2 text-sm text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:cursor-default disabled:opacity-40"
             >
               ✕
             </button>
           </div>
         ))}
       </div>
+
       <div className="mt-3 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={addRow}
-          disabled={rows.length >= legendMaxIntervals}
-          className="cursor-pointer rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] disabled:opacity-60"
-        >
-          Add interval
-        </button>
         <button
           type="button"
           onClick={save}
@@ -150,11 +273,19 @@ export default function RatingLegendForm({
         >
           {saving ? "Saving…" : "Save"}
         </button>
+        <button
+          type="button"
+          onClick={() => update(null)}
+          className="cursor-pointer rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm text-[var(--muted)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
+        >
+          Remove legend
+        </button>
       </div>
       {error && <p className="mt-2 text-xs text-[var(--accent)]">{error}</p>}
       <p className="mt-2 text-xs text-[var(--muted)]">
-        Describe what your ratings mean, e.g. 1–1.5: did not finish. Shown on
-        your public shelf as a legend.
+        Drag the handles (or use the dropdowns) to move boundaries — every
+        rating always falls in exactly one interval. Ranges follow your rating
+        mode.
       </p>
     </div>
   );

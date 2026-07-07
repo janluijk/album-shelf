@@ -79,7 +79,12 @@ export default async function SettingsPage() {
           </h2>
           <RatingLegendForm
             initialLegend={
-              isValidLegend(user.ratingLegend) ? user.ratingLegend : []
+              isValidLegend(user.ratingLegend) ? user.ratingLegend : null
+            }
+            mode={
+              isValidGranularity(user.ratingGranularity)
+                ? user.ratingGranularity
+                : "integer"
             }
           />
         </section>

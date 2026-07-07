@@ -4,7 +4,7 @@ title: 'Custom rating legend: user-described rating intervals'
 status: Done
 assignee: []
 created_date: '2026-07-06 13:47'
-updated_date: '2026-07-07 09:07'
+updated_date: '2026-07-07 10:24'
 labels:
   - m3
   - settings
@@ -22,5 +22,5 @@ Let users describe their own rating scale as intervals with descriptions (e.g. '
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
-Added jsonb rating_legend column to user (migration 0005_loving_thena — regenerate if PR 22's 0005 merges first). Pure lib src/lib/ratingLegend.ts: LegendInterval {min,max,label}, isValidLegend (bounds 1-5, one decimal, min<=max, non-blank label <=60 chars, max 10 intervals, no overlaps), normalizeLegend (sort + trim), formatInterval. PATCH /api/user accepts ratingLegend. Settings gains a Rating legend section (RatingLegendForm: add/remove interval rows, client validation, save). Public profile renders the legend card above the listened list when non-empty.
+Reworked to partition model: legend stored as {cuts, labels} jsonb (same column, no SQL change) — cuts partition [1,5] so every rating falls in exactly one segment by construction. Cut = first value of its right segment; segmentsFor(legend, mode) renders inclusive ranges per granularity (left max = cut − step) and hides segments that collapse on coarser grids; all arithmetic in integer tenths. Editor: segmented bar (accent color-mix tints), draggable pointer-captured cut handles snapping to the mode grid with arrow-key support, star ruler, synced list below with color chip, boundary dropdown, label input, split/merge; create/remove legend flows; success toast on save. API accepts {cuts,labels} or null.
 <!-- SECTION:NOTES:END -->
