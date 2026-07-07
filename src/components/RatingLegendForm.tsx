@@ -23,10 +23,12 @@ type RatingLegendFormProps = {
   mode: RatingGranularity;
 };
 
-const segmentTints = [70, 35, 55, 20, 45, 80, 30, 60];
+const lowestTint = "#ffd9c2";
 
-function tintFor(index: number): string {
-  return `color-mix(in srgb, var(--accent) ${segmentTints[index % segmentTints.length]}%, transparent)`;
+function tintFor(index: number, count: number): string {
+  const share =
+    count === 1 ? 100 : Math.round(10 + (90 * index) / (count - 1));
+  return `color-mix(in oklch, var(--accent) ${share}%, ${lowestTint})`;
 }
 
 export default function RatingLegendForm({
@@ -89,8 +91,7 @@ export default function RatingLegendForm({
     const bar = barRef.current;
     if (!bar || !legend) return;
     const rect = bar.getBoundingClientRect();
-    const span = 4 + step;
-    const raw = 1 + ((clientX - rect.left) / rect.width) * span;
+    const raw = 1 + ((clientX - rect.left) / rect.width) * 4;
     update(moveCut(legend, cutIndex, snapToGrid(raw, mode)));
   }
 
@@ -125,8 +126,7 @@ export default function RatingLegendForm({
     );
   }
 
-  const span = 4 + step;
-  const boundaries = [1, ...legend.cuts, 1 + span];
+  const boundaries = [1, ...legend.cuts, 5];
   const ranges = segmentRanges(legend, mode);
   const stars = [1, 2, 3, 4, 5];
 
@@ -138,8 +138,8 @@ export default function RatingLegendForm({
             <div
               key={i}
               style={{
-                width: `${((boundaries[i + 1] - boundaries[i]) / span) * 100}%`,
-                background: tintFor(i),
+                width: `${((boundaries[i + 1] - boundaries[i]) / 4) * 100}%`,
+                background: tintFor(i, legend.labels.length),
               }}
             />
           ))}
@@ -148,7 +148,7 @@ export default function RatingLegendForm({
           <button
             key={i}
             type="button"
-            aria-label={`Boundary at ${formatValue(cut, "decimal")}, use arrow keys to move`}
+            aria-label={`Boundary at ${formatValue(cut, mode)}, use arrow keys to move`}
             onPointerDown={(event) =>
               event.currentTarget.setPointerCapture(event.pointerId)
             }
@@ -163,7 +163,7 @@ export default function RatingLegendForm({
               if (event.key === "ArrowRight")
                 update(moveCut(legend, i, cut + step));
             }}
-            style={{ left: `${((cut - 1) / span) * 100}%` }}
+            style={{ left: `${((cut - 1) / 4) * 100}%` }}
             className="absolute -top-1 h-11 w-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-full border border-[var(--card-border)] bg-[var(--foreground)] focus:border-[var(--accent)] focus:outline-none"
           />
         ))}
@@ -174,8 +174,14 @@ export default function RatingLegendForm({
           {stars.map((star) => (
             <span
               key={star}
-              style={{ left: `${((star - 1 + step / 2) / span) * 100}%` }}
-              className="absolute -translate-x-1/2"
+              style={{ left: `${((star - 1) / 4) * 100}%` }}
+              className={`absolute ${
+                star === 1
+                  ? ""
+                  : star === 5
+                    ? "-translate-x-full"
+                    : "-translate-x-1/2"
+              }`}
             >
               {star}★
             </span>
@@ -188,7 +194,7 @@ export default function RatingLegendForm({
           <div key={i} className="flex items-center gap-2">
             <span
               aria-hidden
-              style={{ background: tintFor(i) }}
+              style={{ background: tintFor(i, legend.labels.length) }}
               className="h-4 w-4 shrink-0 rounded"
             />
             {i === 0 ? (
