@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
 import { isValidGranularity } from "@/lib/ratings";
+import { isValidLegend, legendEntries } from "@/lib/ratingLegend";
 import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 
@@ -34,6 +35,9 @@ export default async function ProfilePage({
   const ratingMode = isValidGranularity(user.ratingGranularity)
     ? user.ratingGranularity
     : "integer";
+  const legend = isValidLegend(user.ratingLegend)
+    ? legendEntries(user.ratingLegend)
+    : [];
 
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 p-6">
@@ -78,6 +82,23 @@ export default async function ProfilePage({
           ))}
         </ul>
       </section>
+      {legend.length > 0 && (
+        <section className="mt-4 rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Rating legend
+          </h2>
+          <dl className="space-y-1.5 text-sm">
+            {legend.map((entry) => (
+              <div key={entry.stars} className="flex items-center gap-3">
+                <dt className="shrink-0">
+                  <StarRating value={entry.stars} />
+                </dt>
+                <dd className="text-[var(--muted)]">{entry.label}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+      )}
     </main>
   );
 }

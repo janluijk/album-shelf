@@ -43,6 +43,13 @@
       "when": 1783414988704,
       "tag": "0005_low_ultron",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1783427589827,
+      "tag": "0006_dashing_micromacro",
+      "breakpoints": true
     }
   ]
 }
