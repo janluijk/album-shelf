@@ -3,12 +3,13 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
-import { users } from "@/lib/db/schema";
+import { albums, users } from "@/lib/db/schema";
 import UsernameForm from "@/components/UsernameForm";
 import BioForm from "@/components/BioForm";
 import RatingModeForm from "@/components/RatingModeForm";
 import VisibilityForm from "@/components/VisibilityForm";
 import RatingLegendForm from "@/components/RatingLegendForm";
+import RymImportForm from "@/components/RymImportForm";
 import { isValidLegend } from "@/lib/ratingLegend";
 import { isValidGranularity } from "@/lib/ratings";
 
@@ -18,9 +19,13 @@ export default async function SettingsPage() {
   if (!userId) redirect("/");
 
   const db = getDb();
-  const user = await db.query.users.findFirst({
-    where: eq(users.id, userId),
-  });
+  const [user, shelf] = await Promise.all([
+    db.query.users.findFirst({ where: eq(users.id, userId) }),
+    db.query.albums.findMany({
+      where: eq(albums.userId, userId),
+      columns: { id: true, title: true, artist: true },
+    }),
+  ]);
   if (!user) redirect("/");
 
   return (
@@ -85,6 +90,12 @@ export default async function SettingsPage() {
               isValidLegend(user.ratingLegend) ? user.ratingLegend : null
             }
           />
+        </section>
+        <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Import from RateYourMusic
+          </h2>
+          <RymImportForm initialShelf={shelf} />
         </section>
       </div>
     </main>
