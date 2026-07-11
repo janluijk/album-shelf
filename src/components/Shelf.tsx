@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Album } from "@/lib/db/schema";
 import { partitionAlbums, reorderQueue } from "@/lib/albums";
+import AlbumAutocomplete from "@/components/AlbumAutocomplete";
 import AlbumCover from "@/components/AlbumCover";
 import AlbumReviewModal from "@/components/AlbumReviewModal";
 import StarRating from "@/components/StarRating";
@@ -198,11 +199,13 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
           ))}
         </ul>
         <div className="flex flex-col sm:flex-row gap-2">
-          <input
+          <AlbumAutocomplete
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
-            placeholder="Album"
-            className="flex-1 min-w-0 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+            onChangeText={setTitle}
+            onSelect={(result) => {
+              setTitle(result.title);
+              setArtist(result.artist);
+            }}
           />
           <input
             value={artist}
