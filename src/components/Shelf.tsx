@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Album } from "@/lib/db/schema";
 import { partitionAlbums, swapWithNeighbor } from "@/lib/albums";
+import AlbumCover from "@/components/AlbumCover";
 import CoverThumb from "@/components/CoverThumb";
 import StarRating from "@/components/StarRating";
 import type { RatingGranularity } from "@/lib/ratings";
@@ -80,56 +81,55 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
             Nothing queued. Add an album below.
           </p>
         )}
-        <ul className="space-y-2 mb-5">
+        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
           {queue.map((album, index) => (
-            <li key={album.id} className="group flex items-center gap-3">
-              <CoverThumb coverUrl={album.coverUrl} title={album.title} />
-              <div className="flex-1">
-                <span className="text-sm font-medium">{album.title}</span>
-                <span className="text-sm text-[var(--muted)]">
-                  {" "}
-                  — {album.artist}
-                </span>
+            <li key={album.id} className="group">
+              <div className="grayscale opacity-60 transition group-hover:opacity-90">
+                <AlbumCover coverUrl={album.coverUrl} title={album.title} />
               </div>
-              {index === 0 && (
-                <button
-                  type="button"
-                  onClick={() =>
-                    patchAlbum(album.id, { listenedOn: today() })
-                  }
-                  className="rounded-lg bg-[var(--accent)] text-white px-3 py-1.5 text-xs font-medium"
-                >
-                  Mark as listened
-                </button>
-              )}
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => moveAlbum(album.id, "up")}
-                  disabled={index === 0}
-                  aria-label={`Move ${album.title} up`}
-                  className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
-                >
-                  ↑
-                </button>
-                <button
-                  type="button"
-                  onClick={() => moveAlbum(album.id, "down")}
-                  disabled={index === queue.length - 1}
-                  aria-label={`Move ${album.title} down`}
-                  className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
-                >
-                  ↓
-                </button>
+              <div className="mt-2">
+                <p className="truncate text-sm font-medium">{album.title}</p>
+                <p className="truncate text-xs text-[var(--muted)]">
+                  {album.artist}
+                </p>
               </div>
-              <button
-                type="button"
-                onClick={() => removeAlbum(album.id)}
-                aria-label={`Remove ${album.title}`}
-                className="text-[var(--muted)] opacity-0 group-hover:opacity-100"
-              >
-                ✕
-              </button>
+              <div className="mt-1 flex items-center justify-between gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+                <button
+                  type="button"
+                  onClick={() => patchAlbum(album.id, { listenedOn: today() })}
+                  className="rounded-lg bg-[var(--accent)] text-white px-2.5 py-1 text-xs font-medium"
+                >
+                  Listened
+                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => moveAlbum(album.id, "up")}
+                    disabled={index === 0}
+                    aria-label={`Move ${album.title} up`}
+                    className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveAlbum(album.id, "down")}
+                    disabled={index === queue.length - 1}
+                    aria-label={`Move ${album.title} down`}
+                    className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => removeAlbum(album.id)}
+                    aria-label={`Remove ${album.title}`}
+                    className="text-[var(--muted)] hover:text-[var(--accent)]"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
             </li>
           ))}
         </ul>
