@@ -6,6 +6,11 @@ import { users } from "@/lib/db/schema";
 import { isValidUsername, usernameRules } from "@/lib/usernames";
 import { isValidGranularity } from "@/lib/ratings";
 import { bioMaxLength, isValidBio, normalizeBio } from "@/lib/bio";
+import {
+  isValidLegend,
+  normalizeLegend,
+  type RatingLegend,
+} from "@/lib/ratingLegend";
 
 export async function PATCH(request: Request) {
   const session = await auth();
@@ -21,6 +26,7 @@ export async function PATCH(request: Request) {
     ratingGranularity?: string;
     bio?: string | null;
     shelfPublic?: boolean;
+    ratingLegend?: RatingLegend | null;
   } = {};
 
   if ("username" in body) {
@@ -69,6 +75,20 @@ export async function PATCH(request: Request) {
     updates.shelfPublic = body.shelfPublic;
   }
 
+  if ("ratingLegend" in body) {
+    if (body.ratingLegend !== null && !isValidLegend(body.ratingLegend)) {
+      return NextResponse.json(
+        {
+          error:
+            "Invalid rating legend. Provide a short description for each star rating from 1 to 5.",
+        },
+        { status: 400 },
+      );
+    }
+    updates.ratingLegend =
+      body.ratingLegend === null ? null : normalizeLegend(body.ratingLegend);
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: "No valid updates" }, { status: 400 });
   }
@@ -82,6 +102,7 @@ export async function PATCH(request: Request) {
       ratingGranularity: users.ratingGranularity,
       bio: users.bio,
       shelfPublic: users.shelfPublic,
+      ratingLegend: users.ratingLegend,
     });
   return NextResponse.json(updated);
 }

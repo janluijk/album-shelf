@@ -8,6 +8,8 @@ import UsernameForm from "@/components/UsernameForm";
 import BioForm from "@/components/BioForm";
 import RatingModeForm from "@/components/RatingModeForm";
 import VisibilityForm from "@/components/VisibilityForm";
+import RatingLegendForm from "@/components/RatingLegendForm";
+import { isValidLegend } from "@/lib/ratingLegend";
 import { isValidGranularity } from "@/lib/ratings";
 
 export default async function SettingsPage() {
@@ -75,6 +77,16 @@ export default async function SettingsPage() {
               isValidGranularity(user.ratingGranularity)
                 ? user.ratingGranularity
                 : "integer"
+            }
+          />
+        </section>
+        <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Rating legend
+          </h2>
+          <RatingLegendForm
+            initialLegend={
+              isValidLegend(user.ratingLegend) ? user.ratingLegend : null
             }
           />
         </section>
