@@ -6,16 +6,8 @@ import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
 import { isValidGranularity } from "@/lib/ratings";
 import { isValidLegend, legendEntries } from "@/lib/ratingLegend";
-import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
-
-function formatDate(value: string): string {
-  return new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
-}
+import ProfileAlbumGrid from "@/components/ProfileAlbumGrid";
 
 export default async function ProfilePage({
   params,
@@ -67,25 +59,7 @@ export default async function ProfilePage({
         {history.length === 0 && (
           <p className="text-sm text-[var(--muted)]">Nothing here yet.</p>
         )}
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-          {history.map((album) => (
-            <li key={album.id}>
-              <AlbumCover coverUrl={album.coverUrl} title={album.title} />
-              <div className="mt-2">
-                <p className="truncate text-sm font-medium">{album.title}</p>
-                <p className="truncate text-xs text-[var(--muted)]">
-                  {album.artist}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
-                  <StarRating value={album.rating} mode={ratingMode} />
-                  <span className="text-xs text-[var(--muted)]">
-                    {formatDate(album.listenedOn!)}
-                  </span>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <ProfileAlbumGrid history={history} ratingMode={ratingMode} />
       </section>
       {legend.length > 0 && (
         <section className="mt-4 rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
