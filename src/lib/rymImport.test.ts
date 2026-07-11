@@ -62,11 +62,13 @@ describe("convertRymRating", () => {
   it("halves the 1-10 scale to stars", () => {
     expect(convertRymRating("10")).toBe(5);
     expect(convertRymRating("7")).toBe(3.5);
-    expect(convertRymRating("2")).toBe(1);
+    expect(convertRymRating("4")).toBe(2);
   });
 
-  it("clamps a 1/10 rating to the 1-star minimum", () => {
+  it("clamps anything below 2 stars to 1 star", () => {
     expect(convertRymRating("1")).toBe(1);
+    expect(convertRymRating("2")).toBe(1);
+    expect(convertRymRating("3")).toBe(1);
   });
 
   it("treats zero, blanks and junk as unrated", () => {

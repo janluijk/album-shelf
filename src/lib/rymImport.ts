@@ -99,7 +99,9 @@ export function mergeArtistName(
 export function convertRymRating(value: string): number | null {
   const rating = Number(value.trim());
   const isRated = Number.isInteger(rating) && rating >= 1 && rating <= 10;
-  return isRated ? Math.max(1, rating / 2) : null;
+  if (!isRated) return null;
+  const stars = rating / 2;
+  return stars < 2 ? 1 : stars;
 }
 
 export function parseRymReleaseYear(value: string): number | null {
