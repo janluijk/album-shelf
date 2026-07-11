@@ -12,9 +12,12 @@ type ImportItem = {
   artist: string;
   rating: number | null;
   releaseYear: number | null;
+  listenedOn: string | null;
   action: "create" | "update";
   albumId?: number;
 };
+
+const isoDatePattern = /^[12][0-9]{3}-[0-9]{2}-[0-9]{2}$/;
 
 type ImportResult = {
   status: "created" | "updated" | "error";
@@ -38,6 +41,13 @@ function parseItem(value: unknown): ImportItem | null {
       : Number.isInteger(item.releaseYear)
         ? (item.releaseYear as number)
         : undefined;
+  const listenedOn =
+    item.listenedOn === null || item.listenedOn === undefined
+      ? null
+      : typeof item.listenedOn === "string" &&
+          isoDatePattern.test(item.listenedOn)
+        ? item.listenedOn
+        : undefined;
   const isCreate = item.action === "create";
   const isUpdate =
     item.action === "update" && Number.isInteger(item.albumId);
@@ -46,6 +56,7 @@ function parseItem(value: unknown): ImportItem | null {
     artist.length > 0 &&
     rating !== undefined &&
     releaseYear !== undefined &&
+    listenedOn !== undefined &&
     (isCreate || isUpdate);
   if (!isValid) return null;
   return {
@@ -53,6 +64,7 @@ function parseItem(value: unknown): ImportItem | null {
     artist,
     rating,
     releaseYear,
+    listenedOn,
     action: isCreate ? "create" : "update",
     albumId: isUpdate ? (item.albumId as number) : undefined,
   };
@@ -61,7 +73,7 @@ function parseItem(value: unknown): ImportItem | null {
 async function importItem(
   userId: string,
   item: ImportItem,
-  listenedOn: string,
+  fallbackListenedOn: string,
 ): Promise<ImportResult> {
   const db = getDb();
   if (item.action === "update") {
@@ -82,7 +94,7 @@ async function importItem(
     rating: item.rating,
     coverUrl: metadata.coverUrl,
     releaseYear: item.releaseYear ?? metadata.releaseYear,
-    listenedOn,
+    listenedOn: item.listenedOn ?? fallbackListenedOn,
   });
   return { status: "created" };
 }
@@ -107,7 +119,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const listenedOn = new Date().toISOString().slice(0, 10);
+  const fallbackListenedOn = new Date().toISOString().slice(0, 10);
   const results: ImportResult[] = [];
   for (const rawItem of rawItems) {
     const item = parseItem(rawItem);
@@ -115,7 +127,7 @@ export async function POST(request: Request) {
       results.push({ status: "error", message: "Invalid import row" });
       continue;
     }
-    const result = await importItem(userId, item, listenedOn).catch(() => ({
+    const result = await importItem(userId, item, fallbackListenedOn).catch(() => ({
       status: "error" as const,
       message: "Import failed",
     }));

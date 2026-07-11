@@ -7,6 +7,7 @@ import {
   mergeArtistName,
   parseCsv,
   parseRymCsv,
+  parseRymDate,
   parseRymReleaseYear,
   type RymRow,
 } from "./rymImport";
@@ -97,10 +98,23 @@ describe("parseRymReleaseYear", () => {
   });
 });
 
+describe("parseRymDate", () => {
+  it("parses full dates in dash or slash format", () => {
+    expect(parseRymDate("2020-01-15")).toBe("2020-01-15");
+    expect(parseRymDate("2020/1/5")).toBe("2020-01-05");
+  });
+
+  it("rejects blanks, bare years and impossible dates", () => {
+    expect(parseRymDate("")).toBeNull();
+    expect(parseRymDate("2020")).toBeNull();
+    expect(parseRymDate("2020-02-30")).toBeNull();
+  });
+});
+
 describe("parseRymCsv", () => {
-  it("parses rows into title, artist, rating and year", () => {
+  it("parses rows into title, artist, rating, year and purchase date", () => {
     const result = parseRymCsv(
-      csv("1,David,Bowie,,,Low,1977,9,,,"),
+      csv("1,David,Bowie,,,Low,1977,9,,2020-01-15,"),
     );
     expect(result).toEqual({
       ok: true,
@@ -111,6 +125,7 @@ describe("parseRymCsv", () => {
           artist: "David Bowie",
           rating: 4.5,
           releaseYear: 1977,
+          listenedOn: "2020-01-15",
         },
       ],
       errors: [],
@@ -143,7 +158,14 @@ const shelf = [
 ];
 
 function row(title: string, artist: string, line = 2): RymRow {
-  return { line, title, artist, rating: null, releaseYear: null };
+  return {
+    line,
+    title,
+    artist,
+    rating: null,
+    releaseYear: null,
+    listenedOn: null,
+  };
 }
 
 describe("findDuplicates", () => {

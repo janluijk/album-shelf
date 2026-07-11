@@ -48,6 +48,7 @@ export default function RymImportForm({ initialShelf }: RymImportFormProps) {
   const [duplicateAction, setDuplicateAction] =
     useState<DuplicateAction>("skip");
   const [progress, setProgress] = useState<Progress | null>(null);
+  const [cancelling, setCancelling] = useState(false);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [dragging, setDragging] = useState(false);
 
@@ -84,6 +85,7 @@ export default function RymImportForm({ initialShelf }: RymImportFormProps) {
     const skipped = prepared.rows.length - items.length;
 
     cancelRef.current = false;
+    setCancelling(false);
     setProgress({ done: 0, total: items.length });
     const outcome: Summary = {
       created: 0,
@@ -128,6 +130,7 @@ export default function RymImportForm({ initialShelf }: RymImportFormProps) {
     }
 
     setProgress(null);
+    setCancelling(false);
     setPrepared(null);
     setSummary(outcome);
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -145,7 +148,9 @@ export default function RymImportForm({ initialShelf }: RymImportFormProps) {
     return (
       <div className="space-y-3">
         <p className="text-sm">
-          Importing {progress.done}/{progress.total} albums…
+          {cancelling
+            ? "Cancelling — finishing the current batch…"
+            : `Importing ${progress.done}/${progress.total} albums…`}
         </p>
         <div className="h-1.5 overflow-hidden rounded-full bg-[var(--card-border)]">
           <div
@@ -159,10 +164,12 @@ export default function RymImportForm({ initialShelf }: RymImportFormProps) {
           type="button"
           onClick={() => {
             cancelRef.current = true;
+            setCancelling(true);
           }}
-          className="rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm hover:border-[var(--accent)]"
+          disabled={cancelling}
+          className="rounded-lg border border-[var(--card-border)] px-4 py-2 text-sm hover:border-[var(--accent)] disabled:opacity-60"
         >
-          Cancel
+          {cancelling ? "Cancelling…" : "Cancel"}
         </button>
       </div>
     );

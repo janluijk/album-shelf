@@ -4,6 +4,7 @@ export type RymRow = {
   artist: string;
   rating: number | null;
   releaseYear: number | null;
+  listenedOn: string | null;
 };
 
 export type RymRowError = {
@@ -104,6 +105,21 @@ export function convertRymRating(value: string): number | null {
   return stars < 2 ? 1 : stars;
 }
 
+export function parseRymDate(value: string): string | null {
+  const match = value
+    .trim()
+    .match(/^([12][0-9]{3})[-/]([0-9]{1,2})[-/]([0-9]{1,2})$/);
+  if (!match) return null;
+  const [, year, month, day] = match;
+  const date = new Date(`${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}T00:00:00Z`);
+  const isReal =
+    !Number.isNaN(date.getTime()) &&
+    date.getUTCMonth() + 1 === Number(month) &&
+    date.getUTCDate() === Number(day);
+  if (!isReal) return null;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
 export function parseRymReleaseYear(value: string): number | null {
   const match = value.match(/\b(1[0-9]{3}|2[0-9]{3})\b/);
   return match ? Number(match[1]) : null;
@@ -151,6 +167,7 @@ export function parseRymCsv(text: string): RymParseResult {
       artist,
       rating: convertRymRating(column(record, "Rating")),
       releaseYear: parseRymReleaseYear(column(record, "Release_Date")),
+      listenedOn: parseRymDate(column(record, "Purchase Date")),
     });
   });
 
@@ -196,7 +213,7 @@ export function dedupeRows(rows: RymRow[]): RymRow[] {
   });
 }
 
-export const maxImportBatchSize = 10;
+export const maxImportBatchSize = 5;
 
 export function chunk<T>(items: T[], size: number): T[][] {
   const chunks: T[][] = [];
