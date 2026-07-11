@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import type { Album } from "@/lib/db/schema";
-import { partitionAlbums, swapWithNeighbor } from "@/lib/albums";
-import CoverThumb from "@/components/CoverThumb";
+import { partitionAlbums, reorderQueue } from "@/lib/albums";
+import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 import type { RatingGranularity } from "@/lib/ratings";
 
@@ -28,6 +28,8 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
   const [albums, setAlbums] = useState(initialAlbums);
   const [title, setTitle] = useState("");
   const [artist, setArtist] = useState("");
+  const [draggedId, setDraggedId] = useState<number | null>(null);
+  const [dropTargetId, setDropTargetId] = useState<number | null>(null);
   const { queue, history } = partitionAlbums(albums);
 
   async function addAlbum() {
@@ -58,9 +60,10 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
     });
   }
 
-  function moveAlbum(id: number, direction: "up" | "down") {
-    const swaps = swapWithNeighbor(queue, id, direction);
-    if (!swaps) return;
+  function dropOnAlbum(targetId: number) {
+    setDropTargetId(null);
+    if (draggedId === null) return;
+    const swaps = reorderQueue(queue, draggedId, targetId);
     swaps.forEach((swap) => patchAlbum(swap.id, { position: swap.position }));
   }
 
@@ -80,56 +83,63 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
             Nothing queued. Add an album below.
           </p>
         )}
-        <ul className="space-y-2 mb-5">
-          {queue.map((album, index) => (
-            <li key={album.id} className="group flex items-center gap-3">
-              <CoverThumb coverUrl={album.coverUrl} title={album.title} />
-              <div className="flex-1">
-                <span className="text-sm font-medium">{album.title}</span>
-                <span className="text-sm text-[var(--muted)]">
-                  {" "}
-                  — {album.artist}
-                </span>
+        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {queue.map((album) => (
+            <li
+              key={album.id}
+              draggable
+              onDragStart={() => setDraggedId(album.id)}
+              onDragEnd={() => {
+                setDraggedId(null);
+                setDropTargetId(null);
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                setDropTargetId(album.id);
+              }}
+              onDragLeave={() =>
+                setDropTargetId((current) =>
+                  current === album.id ? null : current,
+                )
+              }
+              onDrop={(event) => {
+                event.preventDefault();
+                dropOnAlbum(album.id);
+              }}
+              className={`group cursor-grab rounded-xl transition ${
+                draggedId === album.id ? "opacity-40" : ""
+              } ${
+                dropTargetId === album.id && draggedId !== album.id
+                  ? "outline-2 outline-[var(--accent)]"
+                  : ""
+              }`}
+            >
+              <div className="grayscale opacity-60 transition group-hover:opacity-90">
+                <AlbumCover coverUrl={album.coverUrl} title={album.title} />
               </div>
-              {index === 0 && (
+              <div className="mt-2">
+                <p className="truncate text-sm font-medium">{album.title}</p>
+                <p className="truncate text-xs text-[var(--muted)]">
+                  {album.artist}
+                </p>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-1 opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
                 <button
                   type="button"
-                  onClick={() =>
-                    patchAlbum(album.id, { listenedOn: today() })
-                  }
-                  className="rounded-lg bg-[var(--accent)] text-white px-3 py-1.5 text-xs font-medium"
+                  onClick={() => patchAlbum(album.id, { listenedOn: today() })}
+                  className="rounded-lg bg-[var(--accent)] text-white px-2.5 py-1 text-xs font-medium"
                 >
-                  Mark as listened
-                </button>
-              )}
-              <div className="flex gap-1 opacity-0 group-hover:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => moveAlbum(album.id, "up")}
-                  disabled={index === 0}
-                  aria-label={`Move ${album.title} up`}
-                  className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
-                >
-                  ↑
+                  Listened
                 </button>
                 <button
                   type="button"
-                  onClick={() => moveAlbum(album.id, "down")}
-                  disabled={index === queue.length - 1}
-                  aria-label={`Move ${album.title} down`}
-                  className="text-[var(--muted)] hover:text-[var(--accent)] disabled:opacity-30 disabled:hover:text-[var(--muted)]"
+                  onClick={() => removeAlbum(album.id)}
+                  aria-label={`Remove ${album.title}`}
+                  className="text-[var(--muted)] hover:text-[var(--accent)]"
                 >
-                  ↓
+                  ✕
                 </button>
               </div>
-              <button
-                type="button"
-                onClick={() => removeAlbum(album.id)}
-                aria-label={`Remove ${album.title}`}
-                className="text-[var(--muted)] opacity-0 group-hover:opacity-100"
-              >
-                ✕
-              </button>
             </li>
           ))}
         </ul>
@@ -166,34 +176,35 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
             Albums you mark as listened show up here.
           </p>
         )}
-        <ul className="space-y-3">
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
           {history.map((album) => (
             <li key={album.id} className="group">
-              <div className="flex items-center gap-3">
-                <CoverThumb coverUrl={album.coverUrl} title={album.title} />
-                <div className="flex-1">
-                  <span className="text-sm font-medium">{album.title}</span>
-                  <span className="text-sm text-[var(--muted)]">
-                    {" "}
-                    — {album.artist}
-                  </span>
-                  <div className="text-xs text-[var(--muted)]">
-                    {formatDate(album.listenedOn!)}
-                  </div>
+              <AlbumCover coverUrl={album.coverUrl} title={album.title} />
+              <div className="mt-2">
+                <div className="flex items-start justify-between gap-1">
+                  <p className="truncate text-sm font-medium">{album.title}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeAlbum(album.id)}
+                    aria-label={`Remove ${album.title}`}
+                    className="shrink-0 text-[var(--muted)] opacity-0 transition group-hover:opacity-100 hover:text-[var(--accent)]"
+                  >
+                    ✕
+                  </button>
                 </div>
-                <StarRating
-                  value={album.rating}
-                  mode={ratingGranularity}
-                  onChange={(rating) => patchAlbum(album.id, { rating })}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeAlbum(album.id)}
-                  aria-label={`Remove ${album.title}`}
-                  className="text-[var(--muted)] opacity-0 group-hover:opacity-100"
-                >
-                  ✕
-                </button>
+                <p className="truncate text-xs text-[var(--muted)]">
+                  {album.artist}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
+                  <StarRating
+                    value={album.rating}
+                    mode={ratingGranularity}
+                    onChange={(rating) => patchAlbum(album.id, { rating })}
+                  />
+                  <span className="text-xs text-[var(--muted)]">
+                    {formatDate(album.listenedOn!)}
+                  </span>
+                </div>
               </div>
               <input
                 defaultValue={album.note ?? ""}
