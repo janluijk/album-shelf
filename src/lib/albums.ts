@@ -43,6 +43,25 @@ export function swapWithNeighbor<T extends AlbumLike & { id: number }>(
   ];
 }
 
+export function reorderQueue<T extends AlbumLike & { id: number }>(
+  queue: T[],
+  draggedId: number,
+  targetId: number,
+): PositionSwap[] {
+  const sorted = [...queue].sort((a, b) => a.position - b.position);
+  const from = sorted.findIndex((album) => album.id === draggedId);
+  const to = sorted.findIndex((album) => album.id === targetId);
+  const isNoOp = from === -1 || to === -1 || from === to;
+  if (isNoOp) return [];
+
+  const positions = sorted.map((album) => album.position);
+  const [moved] = sorted.splice(from, 1);
+  sorted.splice(to, 0, moved);
+  return sorted
+    .map((album, index) => ({ id: album.id, position: positions[index] }))
+    .filter((swap, index) => sorted[index].position !== swap.position);
+}
+
 export function isValidRating(value: unknown): value is number {
   return (
     typeof value === "number" &&

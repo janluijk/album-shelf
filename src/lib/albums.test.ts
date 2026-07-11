@@ -3,8 +3,50 @@ import {
   isValidRating,
   nextPosition,
   partitionAlbums,
+  reorderQueue,
   swapWithNeighbor,
 } from "./albums";
+
+describe("reorderQueue", () => {
+  const queue = [
+    { id: 1, listenedOn: null, position: 1 },
+    { id: 2, listenedOn: null, position: 2 },
+    { id: 3, listenedOn: null, position: 3 },
+    { id: 4, listenedOn: null, position: 4 },
+  ];
+
+  it("moves an album down and shifts the ones in between", () => {
+    expect(reorderQueue(queue, 1, 3)).toEqual([
+      { id: 2, position: 1 },
+      { id: 3, position: 2 },
+      { id: 1, position: 3 },
+    ]);
+  });
+
+  it("moves an album up and shifts the ones in between", () => {
+    expect(reorderQueue(queue, 4, 2)).toEqual([
+      { id: 4, position: 2 },
+      { id: 2, position: 3 },
+      { id: 3, position: 4 },
+    ]);
+  });
+
+  it("keeps the existing position values, even when sparse", () => {
+    const sparse = [
+      { id: 1, listenedOn: null, position: 10 },
+      { id: 2, listenedOn: null, position: 25 },
+    ];
+    expect(reorderQueue(sparse, 2, 1)).toEqual([
+      { id: 2, position: 10 },
+      { id: 1, position: 25 },
+    ]);
+  });
+
+  it("returns nothing for a drop on itself or unknown ids", () => {
+    expect(reorderQueue(queue, 2, 2)).toEqual([]);
+    expect(reorderQueue(queue, 99, 1)).toEqual([]);
+  });
+});
 
 describe("partitionAlbums", () => {
   it("splits albums into queue and history", () => {
