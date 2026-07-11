@@ -40,8 +40,7 @@ export default function VisibilityForm({ initialPublic }: VisibilityFormProps) {
           onChange={() => choose(true)}
           className="accent-[var(--accent)]"
         />
-        Public — anyone with the link can view your shelf, and it appears in
-        Browse shelves
+        Public
       </label>
       <label className="flex cursor-pointer items-center gap-2 text-sm">
         <input
@@ -51,7 +50,7 @@ export default function VisibilityForm({ initialPublic }: VisibilityFormProps) {
           onChange={() => choose(false)}
           className="accent-[var(--accent)]"
         />
-        Private — only you can view your shelf
+        Private
       </label>
       {error && <p className="text-xs text-[var(--accent)]">{error}</p>}
     </div>
