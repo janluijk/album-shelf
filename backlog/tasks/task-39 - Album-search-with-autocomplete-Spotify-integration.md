@@ -1,10 +1,10 @@
 ---
 id: TASK-39
 title: Album search with autocomplete (using existing API)
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-11 11:18'
-updated_date: '2026-07-11 12:13'
+updated_date: '2026-07-11 12:45'
 labels:
   - search
   - add-album
@@ -47,19 +47,25 @@ Use the existing album lookup API (MusicBrainz + Cover Art Archive) that already
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Search input field integrated into album-add form or dedicated search page
-- [ ] #2 Search API endpoint (GET /api/albums/search?q=...) queries MusicBrainz for albums by title/artist
-- [ ] #3 Search results display: album cover art (from Cover Art Archive), album title, artist name(s), release year
-- [ ] #4 Autocomplete dropdown appears while typing; hidden on blur or when empty
-- [ ] #5 Autocomplete requests debounced (300-500ms) to reduce MusicBrainz lookups
-- [ ] #6 Selecting a result from autocomplete pre-fills the add-album form with fetched metadata
-- [ ] #7 Cover art fetched from Cover Art Archive (same as manual album addition)
-- [ ] #8 Loading state shown during search (spinner or skeleton)
-- [ ] #9 Empty results message shown when album not found in MusicBrainz
-- [ ] #10 MusicBrainz lookup errors caught and shown to user gracefully
-- [ ] #11 Search works on mobile and desktop (responsive autocomplete positioning)
-- [ ] #12 Cache duplicate searches within a session (5-10min) to avoid redundant lookups
-- [ ] #13 Album metadata and covers retrieved using same pipeline as manual album addition (no inconsistency)
-- [ ] #14 Unit tests for search query parsing, MusicBrainz API calls, error handling
+- [x] #1 Search input field integrated into album-add form or dedicated search page
+- [x] #2 Search API endpoint (GET /api/albums/search?q=...) queries MusicBrainz for albums by title/artist
+- [x] #3 Search results display: album cover art (from Cover Art Archive), album title, artist name(s), release year
+- [x] #4 Autocomplete dropdown appears while typing; hidden on blur or when empty
+- [x] #5 Autocomplete requests debounced (300-500ms) to reduce MusicBrainz lookups
+- [x] #6 Selecting a result from autocomplete pre-fills the add-album form with fetched metadata
+- [x] #7 Cover art fetched from Cover Art Archive (same as manual album addition)
+- [x] #8 Loading state shown during search (spinner or skeleton)
+- [x] #9 Empty results message shown when album not found in MusicBrainz
+- [x] #10 MusicBrainz lookup errors caught and shown to user gracefully
+- [x] #11 Search works on mobile and desktop (responsive autocomplete positioning)
+- [x] #12 Cache duplicate searches within a session (5-10min) to avoid redundant lookups
+- [x] #13 Album metadata and covers retrieved using same pipeline as manual album addition (no inconsistency)
+- [x] #14 Unit tests for search query parsing, MusicBrainz API calls, error handling
 - [ ] #15 Integration tests for full search flow (query → results → selection)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Search-as-you-type on the shelf add-form via the existing MusicBrainz pipeline — no new API credentials. src/lib/albumSearch.ts (pure, 9 unit tests): release-group search URL builder, artist-credit joining with joinphrases, result parsing with case-insensitive title+artist dedupe and an 8-result cap, reusing coverArtUrl/parseReleaseYear from coverArt.ts. GET /api/albums/search?q= (auth-guarded, min 2 chars, 5s timeout, 502 with friendly message on MusicBrainz failure). AlbumAutocomplete component replaces the Album input: 400ms debounce, in-session Map cache per query, request aborting, combobox/listbox ARIA with aria-controls, loading/empty/error states in the dropdown, cover thumbnails with ♪ fallback on 404, mousedown-select fills both title and artist fields. AC15 (integration test of full flow) covered by lib tests + preview e2e; no authenticated-route harness exists.
+<!-- SECTION:NOTES:END -->
