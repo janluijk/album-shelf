@@ -67,6 +67,7 @@ export default async function ProfilePage({
                 {user.username?.charAt(0) ?? "?"}
               </div>
             )}
+            <p className="text-sm font-medium">@{user.username}</p>
             {user.bio && (
               <p className="w-full whitespace-pre-line break-words text-sm text-[var(--foreground)]">
                 {user.bio}
@@ -86,7 +87,7 @@ export default async function ProfilePage({
         {legend.length > 0 && (
           <aside className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5 md:col-span-2 lg:sticky lg:top-6 lg:col-span-1">
             <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
-              Rating legend
+              My rating legend
             </h2>
             <dl className="space-y-1.5 text-sm">
               {legend.map((entry) => (
