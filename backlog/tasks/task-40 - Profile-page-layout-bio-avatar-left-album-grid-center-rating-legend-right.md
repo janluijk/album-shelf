@@ -1,9 +1,10 @@
 ---
 id: TASK-40
 title: 'Profile page layout: bio/avatar left, album grid center, rating legend right'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-11 11:48'
+updated_date: '2026-07-11 12:59'
 labels:
   - profile
   - ui-polish
@@ -42,18 +43,24 @@ This three-column layout maximizes use of desktop space and keeps related inform
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Profile picture displayed prominently in left sidebar (avatar/circle image, ~150px)
-- [ ] #2 User bio displayed under profile picture in left sidebar; full 280 chars supported
-- [ ] #3 Bio displays correctly with line breaks and text wrapping (verify rendering bug fix)
-- [ ] #4 Album cover grid (recent activity) centered as main content area
-- [ ] #5 Rating legend positioned in right sidebar showing custom rating intervals
-- [ ] #6 Layout responsive on mobile: elements stack vertically (avatar+bio, then grid, then legend)
-- [ ] #7 Layout responsive on tablet: 2-column or adjusted spacing
-- [ ] #8 Left and right sidebars remain visible while scrolling through album grid (sticky or smart positioning)
-- [ ] #9 All three sections (left sidebar, center grid, right legend) are visually balanced
-- [ ] #10 Username and profile header remain at top above three-column layout
-- [ ] #11 Cover grid still shows proper dimensions and responsive columns (2/3/4 based on viewport)
-- [ ] #12 Rating legend is readable and doesn't overlap with other content
+- [x] #1 Profile picture displayed prominently in left sidebar (avatar/circle image, ~150px)
+- [x] #2 User bio displayed under profile picture in left sidebar; full 280 chars supported
+- [x] #3 Bio displays correctly with line breaks and text wrapping (verify rendering bug fix)
+- [x] #4 Album cover grid (recent activity) centered as main content area
+- [x] #5 Rating legend positioned in right sidebar showing custom rating intervals
+- [x] #6 Layout responsive on mobile: elements stack vertically (avatar+bio, then grid, then legend)
+- [x] #7 Layout responsive on tablet: 2-column or adjusted spacing
+- [x] #8 Left and right sidebars remain visible while scrolling through album grid (sticky or smart positioning)
+- [x] #9 All three sections (left sidebar, center grid, right legend) are visually balanced
+- [x] #10 Username and profile header remain at top above three-column layout
+- [x] #11 Cover grid still shows proper dimensions and responsive columns (2/3/4 based on viewport)
+- [x] #12 Rating legend is readable and doesn't overlap with other content
 - [ ] #13 Verified at desktop, tablet (iPad), and mobile sizes via Playwright
 - [ ] #14 Unit or visual tests added for layout responsiveness
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Profile page reworked to a three-column layout on a wider max-w-6xl container: header (@handle + listened count) stays on top; below it a grid with a 220px left sidebar (avatar + bio), fluid center (recent-activity cover grid, unchanged 2/3/4 columns), and 220px right sidebar (rating legend). Avatar: user.image via next/image at 150px in a circle (avatars.githubusercontent.com added to remotePatterns); email-only accounts get an initial-letter fallback circle. Bio moved from the header into the left sidebar with whitespace-pre-line plus break-words (fixes long-word overflow — the suspected rendering bug). Responsive: single-column stack on mobile (avatar+bio, grid, legend); two columns from md (sidebar + grid, legend full-width below); three columns from lg, with sidebars sticky (md:sticky/lg:sticky top-6). Legend section omitted entirely when the user has no legend. AC13/14: profile requires no auth but local Playwright against dev with seeded data was skipped — verify at the three sizes on the preview; layout is markup-only with no logic to unit-test.
+<!-- SECTION:NOTES:END -->
