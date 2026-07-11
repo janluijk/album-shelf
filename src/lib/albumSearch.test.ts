@@ -4,19 +4,30 @@ import {
   joinArtistCredit,
   maxSearchResults,
   parseAlbumSearchResults,
+  sanitizeSearchQuery,
 } from "./albumSearch";
 
+describe("sanitizeSearchQuery", () => {
+  it("strips lucene operators and collapses whitespace", () => {
+    expect(sanitizeSearchQuery('AC/DC: "Back in Black"!')).toBe(
+      "AC DC Back in Black",
+    );
+  });
+});
+
 describe("buildAlbumSearchUrl", () => {
-  it("targets the release-group search endpoint with the query", () => {
+  it("targets the release-group search endpoint filtered to albums", () => {
     const url = new URL(buildAlbumSearchUrl("ok computer"));
     expect(url.pathname).toBe("/ws/2/release-group/");
-    expect(url.searchParams.get("query")).toBe("ok computer");
+    expect(url.searchParams.get("query")).toBe(
+      "(ok computer) AND primarytype:album",
+    );
     expect(url.searchParams.get("fmt")).toBe("json");
   });
 
   it("trims the query", () => {
     const url = new URL(buildAlbumSearchUrl("  low  "));
-    expect(url.searchParams.get("query")).toBe("low");
+    expect(url.searchParams.get("query")).toBe("(low) AND primarytype:album");
   });
 });
 

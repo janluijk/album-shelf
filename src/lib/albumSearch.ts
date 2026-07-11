@@ -28,9 +28,16 @@ export type AlbumSearchResponse = {
   "release-groups"?: SearchGroup[];
 };
 
+export function sanitizeSearchQuery(query: string): string {
+  return query
+    .replace(/[+\-!(){}[\]^"~*?:\\/&|]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function buildAlbumSearchUrl(query: string): string {
   const params = new URLSearchParams({
-    query: query.trim(),
+    query: `(${sanitizeSearchQuery(query)}) AND primarytype:album`,
     fmt: "json",
     limit: String(maxSearchResults * 2),
   });
