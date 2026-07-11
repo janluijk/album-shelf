@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { isValidUsername, usernameRules } from "@/lib/usernames";
 
 type UsernameFormProps = {
@@ -8,6 +9,7 @@ type UsernameFormProps = {
 };
 
 export default function UsernameForm({ initialUsername }: UsernameFormProps) {
+  const router = useRouter();
   const [username, setUsername] = useState(initialUsername ?? "");
   const [draft, setDraft] = useState(initialUsername ?? "");
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +40,7 @@ export default function UsernameForm({ initialUsername }: UsernameFormProps) {
     const updated: { username: string } = await response.json();
     setUsername(updated.username);
     setDraft(updated.username);
+    router.refresh();
   }
 
   return (

@@ -49,11 +49,9 @@ export default async function ProfilePage({
   return (
     <main className="mx-auto w-full max-w-3xl flex-1 p-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-semibold">
-          {user.name ?? user.username}
-        </h1>
+        <h1 className="text-2xl font-semibold">@{user.username}</h1>
         <p className="text-sm text-[var(--muted)]">
-          @{user.username} · {history.length} album
+          {history.length} album
           {history.length === 1 ? "" : "s"} listened
         </p>
         {user.bio && (
