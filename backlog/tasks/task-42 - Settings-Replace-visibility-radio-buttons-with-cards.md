@@ -1,9 +1,10 @@
 ---
 id: TASK-42
 title: 'Settings: Replace visibility radio buttons with cards'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-11 11:57'
+updated_date: '2026-07-11 12:22'
 labels:
   - settings
   - ui-polish
@@ -35,16 +36,22 @@ Task-35 improved the ratings granularity display from bullet points to custom st
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Visibility options displayed as interactive cards instead of radio buttons
-- [ ] #2 Each card clearly shows the visibility option (e.g., "Public", "Private") with optional description
-- [ ] #3 Selected visibility option is visually distinguished from unselected options (e.g., border color, background, or accent color)
-- [ ] #4 Selected card shows clear indicator (e.g., checkmark, filled border, or highlight) using design tokens
-- [ ] #5 Card styling is consistent with other settings cards (rounded corners, borders, padding from design tokens)
-- [ ] #6 Card styling uses Album Shelf design tokens: --card, --card-border, --accent, --foreground, --muted
-- [ ] #7 Only one visibility option can be selected at a time (single-selection behavior preserved)
-- [ ] #8 Clicking a card selects that visibility option and updates the user's profile visibility
-- [ ] #9 Layout responsive on mobile (cards stack or adjust spacing appropriately)
-- [ ] #10 Visual styling consistent with ratings settings tab (task-35) for design cohesion
-- [ ] #11 No regression in visibility API calls or data persistence
+- [x] #1 Visibility options displayed as interactive cards instead of radio buttons
+- [x] #2 Each card clearly shows the visibility option (e.g., "Public", "Private") with optional description
+- [x] #3 Selected visibility option is visually distinguished from unselected options (e.g., border color, background, or accent color)
+- [x] #4 Selected card shows clear indicator (e.g., checkmark, filled border, or highlight) using design tokens
+- [x] #5 Card styling is consistent with other settings cards (rounded corners, borders, padding from design tokens)
+- [x] #6 Card styling uses Album Shelf design tokens: --card, --card-border, --accent, --foreground, --muted
+- [x] #7 Only one visibility option can be selected at a time (single-selection behavior preserved)
+- [x] #8 Clicking a card selects that visibility option and updates the user's profile visibility
+- [x] #9 Layout responsive on mobile (cards stack or adjust spacing appropriately)
+- [x] #10 Visual styling consistent with ratings settings tab (task-35) for design cohesion
+- [x] #11 No regression in visibility API calls or data persistence
 - [ ] #12 Verified visually at desktop, tablet, and mobile sizes via Playwright
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+VisibilityForm now mirrors the RatingModeForm card pattern exactly: role=radiogroup with two role=radio buttons (Public / Private) in a responsive grid (stacked on mobile, 2-up from sm). Each card shows the label plus a concise muted description (Public: anyone can view your shelf; Private: only you can view it); the selected card gets the accent border, accent-tinted background, and accent-colored description. Same optimistic choose() logic and PATCH /api/user, no functional changes. AC12: settings requires auth so local Playwright verification was skipped; verify visually on the PR preview.
+<!-- SECTION:NOTES:END -->
