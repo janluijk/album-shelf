@@ -1,6 +1,7 @@
 import NextAuth from "next-auth";
 import type { Adapter, AdapterUser } from "next-auth/adapters";
 import GitHub from "next-auth/providers/github";
+import Resend from "next-auth/providers/resend";
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
@@ -67,7 +68,16 @@ function buildAdapter(): Adapter {
 
 export const { handlers, auth, signIn, signOut } = NextAuth(() => ({
   adapter: buildAdapter(),
-  providers: [GitHub],
+  providers: [
+    GitHub,
+    Resend({
+      from: process.env.EMAIL_FROM ?? "Album Shelf <onboarding@resend.dev>",
+    }),
+  ],
+  pages: {
+    verifyRequest: "/check-email",
+    error: "/auth-error",
+  },
   redirectProxyUrl: process.env.AUTH_REDIRECT_PROXY_URL,
   callbacks: {
     async session({ session, user }) {

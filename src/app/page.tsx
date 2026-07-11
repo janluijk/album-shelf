@@ -27,6 +27,33 @@ function Landing() {
           Sign in with GitHub
         </button>
       </form>
+      <div className="flex w-full max-w-xs items-center gap-3 text-xs uppercase tracking-wider text-[var(--muted)]">
+        <span className="h-px flex-1 bg-[var(--card-border)]" />
+        or
+        <span className="h-px flex-1 bg-[var(--card-border)]" />
+      </div>
+      <form
+        action={async (formData: FormData) => {
+          "use server";
+          await signIn("resend", formData);
+        }}
+        className="flex w-full max-w-xs flex-col gap-3"
+      >
+        <input
+          type="email"
+          name="email"
+          required
+          placeholder="you@example.com"
+          aria-label="Email address"
+          className="rounded-lg border border-[var(--card-border)] bg-transparent px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
+        />
+        <button
+          type="submit"
+          className="rounded-lg border border-[var(--card-border)] px-5 py-2.5 text-sm font-medium hover:border-[var(--accent)]"
+        >
+          Email me a sign-in link
+        </button>
+      </form>
     </main>
   );
 }

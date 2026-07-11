@@ -20,6 +20,8 @@ npm run dev
 | `DATABASE_URL` | Neon project connection string (pooled) |
 | `AUTH_SECRET` | `npx auth secret` |
 | `AUTH_GITHUB_ID` / `AUTH_GITHUB_SECRET` | GitHub OAuth app with callback `http://localhost:3000/api/auth/callback/github` |
+| `AUTH_RESEND_KEY` | Resend API key for magic-link sign-in emails |
+| `EMAIL_FROM` | Sender address for sign-in emails (optional; defaults to `Album Shelf <onboarding@resend.dev>`) |
 
 Quality gates: `npm run lint`, `npm run typecheck`, `npm run test`, `npm run test:e2e`.
 
@@ -46,7 +48,7 @@ merge to main ──> tests ─> migrate production DB ─> vercel deploy --prod
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Lets Playwright through Vercel deployment protection |
 | `ANTHROPIC_API_KEY` | `@claude` workflow |
 
-Vercel project env vars (production + preview): `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`. Preview deploys get their `DATABASE_URL` overridden per-deployment to the PR's Neon branch.
+Vercel project env vars (production + preview): `DATABASE_URL`, `AUTH_SECRET`, `AUTH_GITHUB_ID`, `AUTH_GITHUB_SECRET`, `AUTH_RESEND_KEY`, `EMAIL_FROM` (optional). Preview deploys get their `DATABASE_URL` overridden per-deployment to the PR's Neon branch.
 
 ### Sign-in on preview deploys
 

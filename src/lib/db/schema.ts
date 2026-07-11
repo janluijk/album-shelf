@@ -1,6 +1,8 @@
 import {
+  boolean,
   date,
   integer,
+  jsonb,
   numeric,
   pgTable,
   primaryKey,
@@ -8,6 +10,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
+import type { RatingLegend } from "@/lib/ratingLegend";
 
 export const users = pgTable("user", {
   id: text("id")
@@ -19,6 +22,8 @@ export const users = pgTable("user", {
   image: text("image"),
   ratingGranularity: text("rating_granularity").notNull().default("integer"),
   bio: text("bio"),
+  shelfPublic: boolean("shelf_public").notNull().default(true),
+  ratingLegend: jsonb("rating_legend").$type<RatingLegend>(),
 });
 
 export const accounts = pgTable(

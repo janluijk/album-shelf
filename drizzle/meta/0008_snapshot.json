@@ -1,6 +1,6 @@
 {
-  "id": "b1827969-12dd-497c-938f-fdbb162633ad",
-  "prevId": "ab267171-9a09-4fad-9ab8-0efbe13b2cac",
+  "id": "fd8fb920-738e-4b21-97d7-d0cbbde590a5",
+  "prevId": "61b40fc9-511e-4fba-aff3-2e08194736eb",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -266,12 +266,6 @@
           "primaryKey": true,
           "notNull": true
         },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "username": {
           "name": "username",
           "type": "text",
@@ -308,6 +302,13 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
+        },
+        "shelf_public": {
+          "name": "shelf_public",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
         },
         "rating_legend": {
           "name": "rating_legend",
