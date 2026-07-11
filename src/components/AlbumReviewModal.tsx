@@ -10,6 +10,8 @@ type AlbumReviewModalProps = {
   album: Album;
   ratingMode: RatingGranularity;
   onClose: () => void;
+  onRate?: (rating: number) => void;
+  onSaveNote?: (note: string | null) => void;
 };
 
 function formatDate(value: string): string {
@@ -24,6 +26,8 @@ export default function AlbumReviewModal({
   album,
   ratingMode,
   onClose,
+  onRate,
+  onSaveNote,
 }: AlbumReviewModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -38,7 +42,7 @@ export default function AlbumReviewModal({
       }
       if (event.key !== "Tab" || !panelRef.current) return;
       const focusable = panelRef.current.querySelectorAll<HTMLElement>(
-        "button, a[href], [tabindex]:not([tabindex='-1'])",
+        "button, a[href], textarea, [tabindex]:not([tabindex='-1'])",
       );
       if (focusable.length === 0) return;
       const first = focusable[0];
@@ -91,17 +95,35 @@ export default function AlbumReviewModal({
           <AlbumCover coverUrl={album.coverUrl} title={album.title} />
         </div>
         <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-          <StarRating value={album.rating} mode={ratingMode} />
+          <StarRating
+            value={album.rating}
+            mode={ratingMode}
+            onChange={onRate}
+          />
           {album.listenedOn && (
             <span className="text-xs text-[var(--muted)]">
               Listened {formatDate(album.listenedOn)}
             </span>
           )}
         </div>
-        {album.note && (
-          <p className="mt-3 whitespace-pre-line border-t border-[var(--card-border)] pt-3 text-sm text-[var(--foreground)]">
-            {album.note}
-          </p>
+        {onSaveNote ? (
+          <textarea
+            defaultValue={album.note ?? ""}
+            placeholder="Add a note…"
+            rows={3}
+            onBlur={(event) => {
+              const note = event.target.value.trim() || null;
+              if (note === album.note) return;
+              onSaveNote(note);
+            }}
+            className="mt-3 w-full resize-none rounded-lg border border-[var(--card-border)] bg-transparent px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          />
+        ) : (
+          album.note && (
+            <p className="mt-3 whitespace-pre-line border-t border-[var(--card-border)] pt-3 text-sm text-[var(--foreground)]">
+              {album.note}
+            </p>
+          )
         )}
       </div>
     </div>
