@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { Album } from "@/lib/db/schema";
 import { partitionAlbums, reorderQueue } from "@/lib/albums";
 import AlbumCover from "@/components/AlbumCover";
+import AlbumReviewModal from "@/components/AlbumReviewModal";
 import StarRating from "@/components/StarRating";
 import type { RatingGranularity } from "@/lib/ratings";
 
@@ -30,7 +31,9 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
   const [artist, setArtist] = useState("");
   const [draggedId, setDraggedId] = useState<number | null>(null);
   const [dropTargetId, setDropTargetId] = useState<number | null>(null);
+  const [openAlbumId, setOpenAlbumId] = useState<number | null>(null);
   const { queue, history } = partitionAlbums(albums);
+  const openAlbum = albums.find((album) => album.id === openAlbumId) ?? null;
 
   async function addAlbum() {
     const canAdd = title.trim().length > 0 && artist.trim().length > 0;
@@ -73,17 +76,68 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+    <div className="space-y-4">
       <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
         <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
-          Queue
+          Listened
+        </h2>
+        {history.length === 0 && (
+          <p className="text-sm text-[var(--muted)]">
+            Albums you mark as listened show up here.
+          </p>
+        )}
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          {history.map((album) => (
+            <li key={album.id} className="group">
+              <button
+                type="button"
+                onClick={() => setOpenAlbumId(album.id)}
+                aria-haspopup="dialog"
+                className="block w-full cursor-pointer rounded-xl text-left focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
+              >
+                <AlbumCover coverUrl={album.coverUrl} title={album.title} />
+              </button>
+              <div className="mt-2">
+                <div className="flex items-start justify-between gap-1">
+                  <p className="truncate text-sm font-medium">{album.title}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeAlbum(album.id)}
+                    aria-label={`Remove ${album.title}`}
+                    className="shrink-0 text-[var(--muted)] opacity-0 transition group-hover:opacity-100 hover:text-[var(--accent)]"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <p className="truncate text-xs text-[var(--muted)]">
+                  {album.artist}
+                </p>
+                <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
+                  <StarRating
+                    value={album.rating}
+                    mode={ratingGranularity}
+                    onChange={(rating) => patchAlbum(album.id, { rating })}
+                  />
+                  <span className="text-xs text-[var(--muted)]">
+                    {formatDate(album.listenedOn!)}
+                  </span>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+        <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+          Want to listen
         </h2>
         {queue.length === 0 && (
           <p className="text-sm text-[var(--muted)] mb-3">
-            Nothing queued. Add an album below.
+            Your queue is empty. Add an album below.
           </p>
         )}
-        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {queue.map((album) => (
             <li
               key={album.id}
@@ -167,59 +221,15 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
         </div>
       </section>
 
-      <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
-        <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
-          Listened
-        </h2>
-        {history.length === 0 && (
-          <p className="text-sm text-[var(--muted)]">
-            Albums you mark as listened show up here.
-          </p>
-        )}
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-          {history.map((album) => (
-            <li key={album.id} className="group">
-              <AlbumCover coverUrl={album.coverUrl} title={album.title} />
-              <div className="mt-2">
-                <div className="flex items-start justify-between gap-1">
-                  <p className="truncate text-sm font-medium">{album.title}</p>
-                  <button
-                    type="button"
-                    onClick={() => removeAlbum(album.id)}
-                    aria-label={`Remove ${album.title}`}
-                    className="shrink-0 text-[var(--muted)] opacity-0 transition group-hover:opacity-100 hover:text-[var(--accent)]"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <p className="truncate text-xs text-[var(--muted)]">
-                  {album.artist}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
-                  <StarRating
-                    value={album.rating}
-                    mode={ratingGranularity}
-                    onChange={(rating) => patchAlbum(album.id, { rating })}
-                  />
-                  <span className="text-xs text-[var(--muted)]">
-                    {formatDate(album.listenedOn!)}
-                  </span>
-                </div>
-              </div>
-              <input
-                defaultValue={album.note ?? ""}
-                placeholder="Add a note…"
-                onBlur={(event) => {
-                  const note = event.target.value.trim() || null;
-                  if (note === album.note) return;
-                  patchAlbum(album.id, { note });
-                }}
-                className="mt-1 w-full bg-transparent border border-transparent focus:border-[var(--card-border)] rounded-lg px-2 py-1 text-xs italic text-[var(--muted)] outline-none"
-              />
-            </li>
-          ))}
-        </ul>
-      </section>
+      {openAlbum && (
+        <AlbumReviewModal
+          album={openAlbum}
+          ratingMode={ratingGranularity}
+          onClose={() => setOpenAlbumId(null)}
+          onRate={(rating) => patchAlbum(openAlbum.id, { rating })}
+          onSaveNote={(note) => patchAlbum(openAlbum.id, { note })}
+        />
+      )}
     </div>
   );
 }
