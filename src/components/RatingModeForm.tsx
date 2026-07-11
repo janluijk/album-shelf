@@ -84,9 +84,6 @@ export default function RatingModeForm({ initialMode }: RatingModeFormProps) {
           );
         })}
       </div>
-      <p className="text-xs text-[var(--muted)]">
-        How you rate albums: whole stars, half stars, or decimal form.
-      </p>
     </div>
   );
 }
