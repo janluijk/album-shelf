@@ -25,6 +25,7 @@ export async function PATCH(request: Request) {
     username?: string;
     ratingGranularity?: string;
     bio?: string | null;
+    shelfPublic?: boolean;
     ratingLegend?: RatingLegend | null;
   } = {};
 
@@ -64,6 +65,16 @@ export async function PATCH(request: Request) {
     updates.bio = normalizeBio(body.bio);
   }
 
+  if ("shelfPublic" in body) {
+    if (typeof body.shelfPublic !== "boolean") {
+      return NextResponse.json(
+        { error: "Invalid visibility" },
+        { status: 400 },
+      );
+    }
+    updates.shelfPublic = body.shelfPublic;
+  }
+
   if ("ratingLegend" in body) {
     if (body.ratingLegend !== null && !isValidLegend(body.ratingLegend)) {
       return NextResponse.json(
@@ -90,6 +101,7 @@ export async function PATCH(request: Request) {
       username: users.username,
       ratingGranularity: users.ratingGranularity,
       bio: users.bio,
+      shelfPublic: users.shelfPublic,
       ratingLegend: users.ratingLegend,
     });
   return NextResponse.json(updated);

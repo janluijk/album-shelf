@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { eq } from "drizzle-orm";
+import { auth } from "@/auth";
 import { getDb } from "@/lib/db";
 import { albums, users } from "@/lib/db/schema";
 import { partitionAlbums } from "@/lib/albums";
@@ -27,6 +28,12 @@ export default async function ProfilePage({
     where: eq(users.username, username),
   });
   if (!user) notFound();
+
+  if (!user.shelfPublic) {
+    const session = await auth();
+    const isOwner = session?.user?.id === user.id;
+    if (!isOwner) notFound();
+  }
 
   const userAlbums = await db.query.albums.findMany({
     where: eq(albums.userId, user.id),

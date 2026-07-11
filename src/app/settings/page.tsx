@@ -7,6 +7,7 @@ import { users } from "@/lib/db/schema";
 import UsernameForm from "@/components/UsernameForm";
 import BioForm from "@/components/BioForm";
 import RatingModeForm from "@/components/RatingModeForm";
+import VisibilityForm from "@/components/VisibilityForm";
 import RatingLegendForm from "@/components/RatingLegendForm";
 import { isValidLegend } from "@/lib/ratingLegend";
 import { isValidGranularity } from "@/lib/ratings";
@@ -54,6 +55,12 @@ export default async function SettingsPage() {
             Username
           </h2>
           <UsernameForm initialUsername={user.username} />
+        </section>
+        <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
+          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+            Visibility
+          </h2>
+          <VisibilityForm initialPublic={user.shelfPublic} />
         </section>
         <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
           <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">

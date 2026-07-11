@@ -1,4 +1,5 @@
 import {
+  boolean,
   date,
   integer,
   jsonb,
@@ -22,6 +23,7 @@ export const users = pgTable("user", {
   image: text("image"),
   ratingGranularity: text("rating_granularity").notNull().default("integer"),
   bio: text("bio"),
+  shelfPublic: boolean("shelf_public").notNull().default(true),
   ratingLegend: jsonb("rating_legend").$type<RatingLegend>(),
 });
 
