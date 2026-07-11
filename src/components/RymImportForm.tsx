@@ -281,7 +281,8 @@ export default function RymImportForm({ initialShelf }: RymImportFormProps) {
       )}
       <p className="text-xs text-[var(--muted)]">
         Imports your rated RYM albums into listening history. Ratings are
-        converted from RYM&apos;s 1-10 scale to stars (7/10 becomes 3.5 stars).
+        converted from RYM&apos;s 1-10 scale to stars (7/10 becomes 3.5 stars;
+        anything below 2 stars becomes 1 star).
       </p>
     </div>
   );

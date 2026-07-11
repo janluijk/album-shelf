@@ -69,6 +69,12 @@ describe("convertRymRating", () => {
     expect(convertRymRating("1")).toBe(1);
     expect(convertRymRating("2")).toBe(1);
     expect(convertRymRating("3")).toBe(1);
+    expect(convertRymRating("3.0")).toBe(1);
+  });
+
+  it("rounds decimal ratings to the nearest half star", () => {
+    expect(convertRymRating("7.5")).toBe(4);
+    expect(convertRymRating("8.2")).toBe(4);
   });
 
   it("treats zero, blanks and junk as unrated", () => {

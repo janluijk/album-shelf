@@ -98,9 +98,9 @@ export function mergeArtistName(
 
 export function convertRymRating(value: string): number | null {
   const rating = Number(value.trim());
-  const isRated = Number.isInteger(rating) && rating >= 1 && rating <= 10;
+  const isRated = Number.isFinite(rating) && rating >= 1 && rating <= 10;
   if (!isRated) return null;
-  const stars = rating / 2;
+  const stars = Math.round(rating) / 2;
   return stars < 2 ? 1 : stars;
 }
 
