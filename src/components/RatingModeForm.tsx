@@ -8,6 +8,12 @@ import {
 } from "@/lib/ratings";
 import { useNotify } from "@/components/ToastProvider";
 
+const GRANULARITY_EXAMPLES: Record<RatingGranularity, string> = {
+  integer: "★★★★",
+  half: "★★★★½",
+  decimal: "4.3",
+};
+
 type RatingModeFormProps = {
   initialMode: RatingGranularity;
 };
@@ -46,21 +52,38 @@ export default function RatingModeForm({ initialMode }: RatingModeFormProps) {
 
   return (
     <div className="space-y-2">
-      {RATING_GRANULARITIES.map((option) => (
-        <label
-          key={option}
-          className="flex cursor-pointer items-center gap-2 text-sm"
-        >
-          <input
-            type="radio"
-            name="rating-mode"
-            checked={mode === option}
-            onChange={() => choose(option)}
-            className="accent-[var(--accent)]"
-          />
-          {GRANULARITY_LABELS[option]}
-        </label>
-      ))}
+      <div
+        role="radiogroup"
+        aria-label="Rating mode"
+        className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+      >
+        {RATING_GRANULARITIES.map((option) => {
+          const selected = mode === option;
+          return (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => choose(option)}
+              className={`rounded-lg border px-4 py-3 text-left transition-colors ${
+                selected
+                  ? "border-[var(--accent)] bg-[var(--accent)]/10"
+                  : "border-[var(--card-border)] hover:border-[var(--muted)]"
+              }`}
+            >
+              <span className="block text-sm font-medium">
+                {GRANULARITY_LABELS[option]}
+              </span>
+              <span
+                className={`mt-1 block text-xs ${selected ? "text-[var(--accent)]" : "text-[var(--muted)]"}`}
+              >
+                {GRANULARITY_EXAMPLES[option]}
+              </span>
+            </button>
+          );
+        })}
+      </div>
       <p className="text-xs text-[var(--muted)]">
         How you rate albums: whole stars, half stars, or decimal form.
       </p>
