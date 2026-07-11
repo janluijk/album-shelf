@@ -66,10 +66,6 @@ export default function UsernameForm({ initialUsername }: UsernameFormProps) {
         </button>
       </div>
       {error && <p className="mt-2 text-xs text-[var(--accent)]">{error}</p>}
-      <p className="mt-2 text-xs text-[var(--muted)]">
-        Your public shelf lives at /u/{username || "…"}. Changing your username
-        changes that link. {usernameRules}
-      </p>
     </div>
   );
 }

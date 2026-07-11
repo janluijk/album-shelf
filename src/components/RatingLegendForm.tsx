@@ -98,11 +98,6 @@ export default function RatingLegendForm({
         </button>
       </div>
       {error && <p className="mt-2 text-xs text-[var(--accent)]">{error}</p>}
-      <p className="mt-2 text-xs text-[var(--muted)]">
-        Describe what each star rating means to you. Filled-in descriptions
-        are shown as a legend on your public shelf; clear them all to remove
-        the legend.
-      </p>
     </div>
   );
 }

@@ -68,9 +68,6 @@ export default function BioForm({ initialBio }: BioFormProps) {
         </button>
       </div>
       {error && <p className="mt-2 text-xs text-[var(--accent)]">{error}</p>}
-      <p className="mt-2 text-xs text-[var(--muted)]">
-        Shown on your public shelf. Leave empty to hide it.
-      </p>
     </div>
   );
 }
