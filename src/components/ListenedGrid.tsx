@@ -4,6 +4,7 @@ import type { Album } from "@/lib/db/schema";
 import type { RatingGranularity } from "@/lib/ratings";
 import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
+import ViewAllTile from "@/components/ViewAllTile";
 
 type ListenedGridProps = {
   albums: Album[];
@@ -11,6 +12,7 @@ type ListenedGridProps = {
   onOpen: (id: number) => void;
   onRate: (id: number, rating: number) => void;
   onRemove: (id: number) => void;
+  viewAll?: { href: string; count: number };
 };
 
 function formatDate(value: string): string {
@@ -27,6 +29,7 @@ export default function ListenedGrid({
   onOpen,
   onRate,
   onRemove,
+  viewAll,
 }: ListenedGridProps) {
   return (
     <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -68,6 +71,11 @@ export default function ListenedGrid({
           </div>
         </li>
       ))}
+      {viewAll && (
+        <li>
+          <ViewAllTile href={viewAll.href} count={viewAll.count} />
+        </li>
+      )}
     </ul>
   );
 }

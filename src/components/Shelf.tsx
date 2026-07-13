@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import type { Album } from "@/lib/db/schema";
 import { partitionAlbums, reorderQueue } from "@/lib/albums";
 import AlbumAutocomplete from "@/components/AlbumAutocomplete";
@@ -74,19 +73,9 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
   return (
     <div className="space-y-4">
       <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xs uppercase tracking-wider text-[var(--muted)]">
-            Listened
-          </h2>
-          {history.length > 0 && (
-            <Link
-              href="/history"
-              className="text-xs text-[var(--muted)] hover:text-[var(--accent)]"
-            >
-              View all {history.length} →
-            </Link>
-          )}
-        </div>
+        <h2 className="text-xs uppercase tracking-wider text-[var(--muted)] mb-3">
+          Listened
+        </h2>
         {history.length === 0 && (
           <p className="text-sm text-[var(--muted)]">
             Albums you mark as listened show up here.
@@ -98,6 +87,11 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
           onOpen={setOpenAlbumId}
           onRate={(id, rating) => patchAlbum(id, { rating })}
           onRemove={removeAlbum}
+          viewAll={
+            history.length > RECENT_LISTENED_LIMIT
+              ? { href: "/history", count: history.length }
+              : undefined
+          }
         />
       </section>
 

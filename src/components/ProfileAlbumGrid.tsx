@@ -6,10 +6,12 @@ import type { RatingGranularity } from "@/lib/ratings";
 import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 import AlbumReviewModal from "@/components/AlbumReviewModal";
+import ViewAllTile from "@/components/ViewAllTile";
 
 type ProfileAlbumGridProps = {
   history: Album[];
   ratingMode: RatingGranularity;
+  viewAll?: { href: string; count: number };
 };
 
 function formatDate(value: string): string {
@@ -23,6 +25,7 @@ function formatDate(value: string): string {
 export default function ProfileAlbumGrid({
   history,
   ratingMode,
+  viewAll,
 }: ProfileAlbumGridProps) {
   const [openAlbum, setOpenAlbum] = useState<Album | null>(null);
 
@@ -53,6 +56,11 @@ export default function ProfileAlbumGrid({
             </button>
           </li>
         ))}
+        {viewAll && (
+          <li>
+            <ViewAllTile href={viewAll.href} count={viewAll.count} />
+          </li>
+        )}
       </ul>
       {openAlbum && (
         <AlbumReviewModal
