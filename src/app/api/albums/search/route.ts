@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import {
   buildAlbumSearchUrl,
+  isSearchableQuery,
   minSearchLength,
   parseAlbumSearchResults,
+  rankAlbumSearchResults,
 } from "@/lib/albumSearch";
 
 const userAgent = "album-shelf/0.1 (https://github.com/janluijk/album-shelf)";
@@ -15,8 +17,12 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const query = new URL(request.url).searchParams.get("q")?.trim() ?? "";
-  if (query.length < minSearchLength) {
+  const params = new URL(request.url).searchParams;
+  const query = {
+    title: params.get("q")?.trim() ?? "",
+    artist: params.get("artist")?.trim() ?? "",
+  };
+  if (!isSearchableQuery(query)) {
     return NextResponse.json(
       { error: `Type at least ${minSearchLength} characters` },
       { status: 400 },
@@ -35,6 +41,9 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json({
-    results: parseAlbumSearchResults(await response.json()),
+    results: rankAlbumSearchResults(
+      parseAlbumSearchResults(await response.json()),
+      query,
+    ),
   });
 }

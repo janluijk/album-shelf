@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   buildAlbumSearchUrl,
+  isSearchableQuery,
   joinArtistCredit,
   maxSearchResults,
   parseAlbumSearchResults,
+  rankAlbumSearchResults,
   sanitizeSearchQuery,
 } from "./albumSearch";
 
@@ -15,9 +17,21 @@ describe("sanitizeSearchQuery", () => {
   });
 });
 
+describe("isSearchableQuery", () => {
+  it("accepts combined title and artist length at the minimum", () => {
+    expect(isSearchableQuery({ title: "o", artist: "k" })).toBe(true);
+  });
+
+  it("rejects queries below the minimum length", () => {
+    expect(isSearchableQuery({ title: " o ", artist: "  " })).toBe(false);
+  });
+});
+
 describe("buildAlbumSearchUrl", () => {
   it("targets the release-group search endpoint filtered to albums", () => {
-    const url = new URL(buildAlbumSearchUrl("ok computer"));
+    const url = new URL(
+      buildAlbumSearchUrl({ title: "ok computer", artist: "" }),
+    );
     expect(url.pathname).toBe("/ws/2/release-group/");
     expect(url.searchParams.get("query")).toBe(
       "(ok computer) AND primarytype:album",
@@ -26,8 +40,24 @@ describe("buildAlbumSearchUrl", () => {
   });
 
   it("trims the query", () => {
-    const url = new URL(buildAlbumSearchUrl("  low  "));
+    const url = new URL(buildAlbumSearchUrl({ title: "  low  ", artist: "" }));
     expect(url.searchParams.get("query")).toBe("(low) AND primarytype:album");
+  });
+
+  it("combines fielded title and artist terms when both are given", () => {
+    const url = new URL(
+      buildAlbumSearchUrl({ title: "low", artist: "david bowie" }),
+    );
+    expect(url.searchParams.get("query")).toBe(
+      "(releasegroup:(low) AND artist:(david bowie)) AND primarytype:album",
+    );
+  });
+
+  it("searches by artist alone when the title is empty", () => {
+    const url = new URL(buildAlbumSearchUrl({ title: "", artist: "bowie" }));
+    expect(url.searchParams.get("query")).toBe(
+      "artist:(bowie) AND primarytype:album",
+    );
   });
 });
 
@@ -92,5 +122,45 @@ describe("parseAlbumSearchResults", () => {
 
   it("handles an empty response", () => {
     expect(parseAlbumSearchResults({})).toEqual([]);
+  });
+});
+
+describe("rankAlbumSearchResults", () => {
+  const result = (id: string, title: string, artist: string) => ({
+    id,
+    title,
+    artist,
+    releaseYear: null,
+    coverUrl: "",
+  });
+
+  it("puts exact artist and title matches first", () => {
+    const ranked = rankAlbumSearchResults(
+      [
+        result("a", "Low Roar", "Someone Else"),
+        result("b", "Low", "David Bowie"),
+      ],
+      { title: "low", artist: "david bowie" },
+    );
+    expect(ranked.map((entry) => entry.id)).toEqual(["b", "a"]);
+  });
+
+  it("scores prefix matches above non-matches", () => {
+    const ranked = rankAlbumSearchResults(
+      [
+        result("a", "Something", "The Band"),
+        result("b", "Low Roar", "The Band"),
+      ],
+      { title: "low", artist: "" },
+    );
+    expect(ranked.map((entry) => entry.id)).toEqual(["b", "a"]);
+  });
+
+  it("keeps the original order for equal scores", () => {
+    const ranked = rankAlbumSearchResults(
+      [result("a", "One", "X"), result("b", "Two", "Y")],
+      { title: "", artist: "" },
+    );
+    expect(ranked.map((entry) => entry.id)).toEqual(["a", "b"]);
   });
 });

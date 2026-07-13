@@ -199,19 +199,21 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
           ))}
         </ul>
         <div className="flex flex-col sm:flex-row gap-2">
-          <AlbumAutocomplete
-            value={title}
-            onChangeText={setTitle}
-            onSelect={(result) => {
-              setTitle(result.title);
-              setArtist(result.artist);
-            }}
-          />
           <input
             value={artist}
             onChange={(event) => setArtist(event.target.value)}
             placeholder="Artist"
+            aria-label="Artist"
             className="flex-1 min-w-0 bg-transparent border border-[var(--card-border)] rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+          />
+          <AlbumAutocomplete
+            title={title}
+            artist={artist}
+            onChangeTitle={setTitle}
+            onSelect={(result) => {
+              setTitle(result.title);
+              setArtist(result.artist);
+            }}
           />
           <button
             type="button"

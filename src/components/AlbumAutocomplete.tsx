@@ -1,25 +1,33 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { minSearchLength, type AlbumSearchResult } from "@/lib/albumSearch";
+import {
+  isSearchableQuery,
+  type AlbumSearchQuery,
+  type AlbumSearchResult,
+} from "@/lib/albumSearch";
 
 const debounceMs = 400;
 
 type AlbumAutocompleteProps = {
-  value: string;
-  onChangeText: (value: string) => void;
+  title: string;
+  artist: string;
+  onChangeTitle: (value: string) => void;
   onSelect: (result: AlbumSearchResult) => void;
 };
 
 export default function AlbumAutocomplete({
-  value,
-  onChangeText,
+  title,
+  artist,
+  onChangeTitle,
   onSelect,
 }: AlbumAutocompleteProps) {
   const listboxId = useId();
   const timerRef = useRef<number | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const cacheRef = useRef(new Map<string, AlbumSearchResult[]>());
+  const skipArtistSearchRef = useRef(false);
+  const previousArtistRef = useRef(artist);
   const [results, setResults] = useState<AlbumSearchResult[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +40,9 @@ export default function AlbumAutocomplete({
     };
   }, []);
 
-  async function search(query: string) {
-    const cached = cacheRef.current.get(query);
+  async function search(query: AlbumSearchQuery) {
+    const cacheKey = `${query.artist}::${query.title}`;
+    const cached = cacheRef.current.get(cacheKey);
     if (cached) {
       setResults(cached);
       setLoading(false);
@@ -42,10 +51,11 @@ export default function AlbumAutocomplete({
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    const response = await fetch(
-      `/api/albums/search?q=${encodeURIComponent(query)}`,
-      { signal: controller.signal },
-    ).catch(() => null);
+    const params = new URLSearchParams({ q: query.title });
+    if (query.artist) params.set("artist", query.artist);
+    const response = await fetch(`/api/albums/search?${params.toString()}`, {
+      signal: controller.signal,
+    }).catch(() => null);
     if (controller.signal.aborted) return;
     setLoading(false);
     if (!response?.ok) {
@@ -54,16 +64,14 @@ export default function AlbumAutocomplete({
       return;
     }
     const { results: found } = await response.json();
-    cacheRef.current.set(query, found);
+    cacheRef.current.set(cacheKey, found);
     setResults(found);
   }
 
-  function handleChange(next: string) {
-    onChangeText(next);
+  function scheduleSearch(query: AlbumSearchQuery) {
     setError(null);
     if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-    const query = next.trim();
-    if (query.length < minSearchLength) {
+    if (!isSearchableQuery(query)) {
       abortRef.current?.abort();
       setResults(null);
       setLoading(false);
@@ -72,10 +80,31 @@ export default function AlbumAutocomplete({
     }
     setLoading(true);
     setOpen(true);
-    timerRef.current = window.setTimeout(() => void search(query), debounceMs);
+    timerRef.current = window.setTimeout(
+      () => void search({ title: query.title.trim(), artist: query.artist.trim() }),
+      debounceMs,
+    );
+  }
+
+  useEffect(() => {
+    const artistUnchanged = previousArtistRef.current === artist;
+    previousArtistRef.current = artist;
+    if (artistUnchanged) return;
+    if (skipArtistSearchRef.current) {
+      skipArtistSearchRef.current = false;
+      return;
+    }
+    scheduleSearch({ title, artist });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artist]);
+
+  function handleChange(next: string) {
+    onChangeTitle(next);
+    scheduleSearch({ title: next, artist });
   }
 
   function select(result: AlbumSearchResult) {
+    skipArtistSearchRef.current = true;
     setOpen(false);
     onSelect(result);
   }
@@ -85,7 +114,7 @@ export default function AlbumAutocomplete({
   return (
     <div className="relative flex-1 min-w-0">
       <input
-        value={value}
+        value={title}
         onChange={(event) => handleChange(event.target.value)}
         onFocus={() => {
           if (results !== null || loading) setOpen(true);
@@ -94,7 +123,7 @@ export default function AlbumAutocomplete({
         onKeyDown={(event) => {
           if (event.key === "Escape") setOpen(false);
         }}
-        placeholder="Search album or artist"
+        placeholder="Album"
         aria-label="Album title"
         aria-expanded={showDropdown}
         aria-haspopup="listbox"

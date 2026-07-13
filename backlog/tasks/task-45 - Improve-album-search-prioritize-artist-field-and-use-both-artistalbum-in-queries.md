@@ -3,9 +3,10 @@ id: TASK-45
 title: >-
   Improve album search: prioritize artist field and use both artist+album in
   queries
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-13 09:02'
+updated_date: '2026-07-13 09:07'
 labels: []
 dependencies: []
 ordinal: 45000
@@ -37,3 +38,9 @@ This makes the search more intuitive and returns higher-quality results, especia
 - [ ] #9 Responsive on mobile: fields stack vertically, artist field still appears first
 - [ ] #10 Verify search quality improvement with test cases (e.g., albums with duplicate titles by different artists)
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Artist field now appears first in the add form. Search sends both fields: MusicBrainz query uses fielded terms (releasegroup:(title) AND artist:(artist)) when both given, artist:(...) alone for artist-only, and the original unfielded query for title-only. Results are re-ranked client-side of MusicBrainz via rankAlbumSearchResults (exact > prefix match per field, stable order). AlbumAutocomplete takes title+artist props, re-searches on artist changes (debounced, skipping the change caused by selecting a result), and selection still fills both fields.
+<!-- SECTION:NOTES:END -->
