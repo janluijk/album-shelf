@@ -35,9 +35,26 @@ export function sanitizeSearchQuery(query: string): string {
     .trim();
 }
 
-export function buildAlbumSearchUrl(query: string): string {
+export type AlbumSearchQuery = {
+  title: string;
+  artist: string;
+};
+
+export function isSearchableQuery(query: AlbumSearchQuery): boolean {
+  return (query.title.trim() + query.artist.trim()).length >= minSearchLength;
+}
+
+export function buildAlbumSearchUrl(query: AlbumSearchQuery): string {
+  const title = sanitizeSearchQuery(query.title);
+  const artist = sanitizeSearchQuery(query.artist);
+  const hasBoth = title.length > 0 && artist.length > 0;
+  const term = hasBoth
+    ? `(releasegroup:(${title}) AND artist:(${artist}))`
+    : artist.length > 0
+      ? `artist:(${artist})`
+      : `(${title})`;
   const params = new URLSearchParams({
-    query: `(${sanitizeSearchQuery(query)}) AND primarytype:album`,
+    query: `${term} AND primarytype:album`,
     fmt: "json",
     limit: String(maxSearchResults * 2),
   });
@@ -74,4 +91,30 @@ export function parseAlbumSearchResults(
     if (results.length === maxSearchResults) break;
   }
   return results;
+}
+
+function fieldMatchScore(value: string, term: string): number {
+  if (!term) return 0;
+  const normalized = value.toLowerCase();
+  if (normalized === term) return 2;
+  if (normalized.startsWith(term)) return 1;
+  return 0;
+}
+
+export function rankAlbumSearchResults(
+  results: AlbumSearchResult[],
+  query: AlbumSearchQuery,
+): AlbumSearchResult[] {
+  const title = query.title.trim().toLowerCase();
+  const artist = query.artist.trim().toLowerCase();
+  return results
+    .map((result, index) => ({
+      result,
+      index,
+      score:
+        fieldMatchScore(result.title, title) +
+        fieldMatchScore(result.artist, artist),
+    }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map((entry) => entry.result);
 }
