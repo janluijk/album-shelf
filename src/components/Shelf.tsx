@@ -104,7 +104,7 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
             Your queue is empty. Add an album below.
           </p>
         )}
-        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {queue.map((album) => (
             <li
               key={album.id}

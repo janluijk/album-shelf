@@ -10,7 +10,8 @@ import { isValidLegend, legendEntries } from "@/lib/ratingLegend";
 import StarRating from "@/components/StarRating";
 import ProfileAlbumGrid from "@/components/ProfileAlbumGrid";
 
-const recentActivityLimit = 5;
+const mobileRecentLimit = 5;
+const desktopRecentLimit = 17;
 
 export default async function ProfilePage({
   params,
@@ -85,10 +86,11 @@ export default async function ProfilePage({
             <p className="text-sm text-[var(--muted)]">Nothing here yet.</p>
           )}
           <ProfileAlbumGrid
-            history={history.slice(0, recentActivityLimit)}
+            history={history.slice(0, desktopRecentLimit)}
             ratingMode={ratingMode}
+            mobileLimit={mobileRecentLimit}
             viewAll={
-              history.length > recentActivityLimit
+              history.length > mobileRecentLimit
                 ? {
                     href: `/u/${user.username}/history`,
                     count: history.length,
