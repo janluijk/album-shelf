@@ -6,10 +6,13 @@ import type { RatingGranularity } from "@/lib/ratings";
 import AlbumCover from "@/components/AlbumCover";
 import StarRating from "@/components/StarRating";
 import AlbumReviewModal from "@/components/AlbumReviewModal";
+import ViewAllTile from "@/components/ViewAllTile";
 
 type ProfileAlbumGridProps = {
   history: Album[];
   ratingMode: RatingGranularity;
+  viewAll?: { href: string; count: number };
+  mobileLimit?: number;
 };
 
 function formatDate(value: string): string {
@@ -23,14 +26,23 @@ function formatDate(value: string): string {
 export default function ProfileAlbumGrid({
   history,
   ratingMode,
+  viewAll,
+  mobileLimit,
 }: ProfileAlbumGridProps) {
   const [openAlbum, setOpenAlbum] = useState<Album | null>(null);
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-        {history.map((album) => (
-          <li key={album.id}>
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+        {history.map((album, index) => (
+          <li
+            key={album.id}
+            className={
+              mobileLimit !== undefined && index >= mobileLimit
+                ? "hidden lg:list-item"
+                : undefined
+            }
+          >
             <button
               type="button"
               onClick={() => setOpenAlbum(album)}
@@ -53,6 +65,11 @@ export default function ProfileAlbumGrid({
             </button>
           </li>
         ))}
+        {viewAll && (
+          <li>
+            <ViewAllTile href={viewAll.href} count={viewAll.count} />
+          </li>
+        )}
       </ul>
       {openAlbum && (
         <AlbumReviewModal

@@ -6,21 +6,15 @@ import { partitionAlbums, reorderQueue } from "@/lib/albums";
 import AlbumAutocomplete from "@/components/AlbumAutocomplete";
 import AlbumCover from "@/components/AlbumCover";
 import AlbumReviewModal from "@/components/AlbumReviewModal";
-import StarRating from "@/components/StarRating";
+import ListenedGrid from "@/components/ListenedGrid";
 import type { RatingGranularity } from "@/lib/ratings";
+
+const RECENT_LISTENED_LIMIT = 5;
 
 type ShelfProps = {
   initialAlbums: Album[];
   ratingGranularity: RatingGranularity;
 };
-
-function formatDate(value: string): string {
-  return new Date(`${value}T00:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -87,46 +81,18 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
             Albums you mark as listened show up here.
           </p>
         )}
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-          {history.map((album) => (
-            <li key={album.id} className="group">
-              <button
-                type="button"
-                onClick={() => setOpenAlbumId(album.id)}
-                aria-haspopup="dialog"
-                className="block w-full cursor-pointer rounded-xl text-left focus-visible:outline-2 focus-visible:outline-[var(--accent)]"
-              >
-                <AlbumCover coverUrl={album.coverUrl} title={album.title} />
-              </button>
-              <div className="mt-2">
-                <div className="flex items-start justify-between gap-1">
-                  <p className="truncate text-sm font-medium">{album.title}</p>
-                  <button
-                    type="button"
-                    onClick={() => removeAlbum(album.id)}
-                    aria-label={`Remove ${album.title}`}
-                    className="shrink-0 text-[var(--muted)] opacity-0 transition group-hover:opacity-100 hover:text-[var(--accent)]"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <p className="truncate text-xs text-[var(--muted)]">
-                  {album.artist}
-                </p>
-                <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
-                  <StarRating
-                    value={album.rating}
-                    mode={ratingGranularity}
-                    onChange={(rating) => patchAlbum(album.id, { rating })}
-                  />
-                  <span className="text-xs text-[var(--muted)]">
-                    {formatDate(album.listenedOn!)}
-                  </span>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <ListenedGrid
+          albums={history.slice(0, RECENT_LISTENED_LIMIT)}
+          ratingGranularity={ratingGranularity}
+          onOpen={setOpenAlbumId}
+          onRate={(id, rating) => patchAlbum(id, { rating })}
+          onRemove={removeAlbum}
+          viewAll={
+            history.length > RECENT_LISTENED_LIMIT
+              ? { href: "/history", count: history.length }
+              : undefined
+          }
+        />
       </section>
 
       <section className="rounded-2xl border border-[var(--card-border)] bg-[var(--card)] p-5">
@@ -138,7 +104,7 @@ export default function Shelf({ initialAlbums, ratingGranularity }: ShelfProps) 
             Your queue is empty. Add an album below.
           </p>
         )}
-        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+        <ul className="mb-5 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
           {queue.map((album) => (
             <li
               key={album.id}

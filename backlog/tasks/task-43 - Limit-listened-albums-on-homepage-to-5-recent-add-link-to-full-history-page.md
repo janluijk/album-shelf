@@ -1,9 +1,10 @@
 ---
 id: TASK-43
 title: 'Limit listened albums on homepage to 5 recent, add link to full history page'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-07-13 08:56'
+updated_date: '2026-07-13 09:01'
 labels: []
 dependencies: []
 ordinal: 43000
@@ -31,3 +32,9 @@ This improves the homepage UX by keeping it focused and scannable, while still a
 - [ ] #8 Ratings, notes, and other album interactions work identically on both the homepage and history page
 - [ ] #9 Verify responsive layout on mobile, tablet, and desktop for both pages
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Extracted the listened-album grid into ListenedGrid (shared client component). Homepage Shelf now shows the 5 most recent listened albums with a 'View all N' link. New /history page (auth-guarded, redirects to /) renders HistoryShelf: full listened grid with album count, Load more pagination (20 per page), and the same rating/note/remove/modal interactions via /api/albums.
+<!-- SECTION:NOTES:END -->
