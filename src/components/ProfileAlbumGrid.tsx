@@ -31,7 +31,7 @@ export default function ProfileAlbumGrid({
 
   return (
     <>
-      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
         {history.map((album) => (
           <li key={album.id}>
             <button
